@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Regístrate — LimpioRD{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-green-950 flex items-center justify-center px-4 py-20">
+    <div class="w-full max-w-lg">
+        <div class="bg-gray-800/80 backdrop-blur rounded-[3rem] border border-gray-700/50 p-10 shadow-2xl relative overflow-hidden group">
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary-600/10 rounded-full blur-3xl group-hover:bg-primary-500/15 transition-all"></div>
+            
+            <div class="relative z-10">
+                <div class="text-center mb-10">
+                    <div class="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-900/40 transform rotate-6 hover:rotate-0 transition-transform">🌿</div>
+                    <h1 class="text-3xl font-black text-white">Únete a LimpioRD</h1>
+                    <p class="text-gray-400 text-sm mt-3">Empieza a limpiar tu ciudad y gana premios únicos.</p>
+                </div>
+
+                <form method="POST" action="{% url 'accounts:signup' %}" class="grid md:grid-cols-2 gap-6">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Nombre</label>
+                        <input type="text" name="nombre" required placeholder="Ej: Juan"
+                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Apellido</label>
+                        <input type="text" name="apellido" required placeholder="Ej: Pérez"
+                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Correo Electrónico</label>
+                        <input type="email" name="email" required placeholder="juan@ejemplo.com"
+                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Contraseña</label>
+                        <input type="password" name="password" required placeholder="••••••••"
+                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
+                    </div>
+
+                    <div class="md:col-span-2 pt-6">
+                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-black py-4 rounded-[1.5rem] shadow-xl shadow-green-950/50 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                            Crear Cuenta Nueva →
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-10">
+                    <p class="text-xs text-gray-500">¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}" class="text-primary-400 font-bold hover:underline">Inicia Sesión</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

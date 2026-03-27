@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Gestión de Reportes — LimpioRD{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-black text-gray-900">Gestión de Reportes</h1>
+            <p class="text-sm text-gray-500 mt-1">{{ reportes|length }} resultado{{ reportes|length|pluralize:"s" }}</p>
+        </div>
+        <a href="/panel/dashboard/" class="text-sm text-gray-500 hover:text-primary-600 font-medium transition-colors">← Dashboard</a>
+    </div>
+
+    <!-- Filters -->
+    <form method="GET" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-center">
+        <div class="relative flex-1 min-w-[200px]">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="q" value="{{ q }}" placeholder="Buscar por barrio o descripción…"
+                   class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-400">
+        </div>
+        <select name="estado" class="border border-gray-200 rounded-xl text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-400 bg-white">
+            <option value="">Todos los estados</option>
+            {% for val, label in estados %}
+            <option value="{{ val }}" {% if val == estado_sel %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors">Filtrar</button>
+        {% if estado_sel or q %}<a href="/panel/reportes/" class="text-sm text-gray-500 hover:text-red-500 transition-colors">Limpiar</a>{% endif %}
+    </form>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Ubicación</th>
+                        <th class="px-6 py-3 text-left">Categoría</th>
+                        <th class="px-6 py-3 text-left">Estado</th>
+                        <th class="px-6 py-3 text-left">Urgencia</th>
+                        <th class="px-6 py-3 text-left">Ciudadano</th>
+                        <th class="px-6 py-3 text-left">Fecha</th>
+                        <th class="px-6 py-3 text-left">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                {% for r in reportes %}
+                <tr class="hover:bg-gray-50 transition-colors" x-data="{open:false}">
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-900">{{ r.barrio|default:"Sin barrio" }}</div>
+                        <div class="text-gray-400 text-xs mt-0.5">{{ r.descripcion|truncatechars:50 }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">{{ r.categoria.nombre|default:"—" }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold
+                            {% if r.estado == 'pendiente' %}bg-red-100 text-red-700
+                            {% elif r.estado == 'en_proceso' %}bg-yellow-100 text-yellow-700
+                            {% elif r.estado == 'resuelto' %}bg-green-100 text-green-700
+                            {% elif r.estado == 'revisando' %}bg-blue-100 text-blue-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">
+                            {{ r.get_estado_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="font-semibold text-sm {% if r.urgencia >= 3 %}text-red-500{% elif r.urgencia == 2 %}text-yellow-500{% else %}text-green-500{% endif %}">
+                            {{ r.get_urgencia_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">
+                        {% if r.ciudadano %}{{ r.ciudadano.nombre_completo }}{% else %}<span class="text-gray-300">Anónimo</span>{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-gray-400 text-xs">{{ r.creado_en|date:"d M Y" }}</td>
+                    <td class="px-6 py-4">
+                        <!-- Cambiar estado -->
+                        <div x-data="{open:false}" class="relative">
+                            <button @click="open=!open" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                Cambiar ▾
+                            </button>
+                            <div x-show="open" @click.outside="open=false" class="absolute right-0 top-8 z-20 bg-white border border-gray-200 rounded-xl shadow-xl w-44 py-1 text-xs">
+                                {% for val, label in estados %}
+                                {% if val != r.estado %}
+                                <form method="POST" action="/panel/reportes/{{ r.id }}/estado/">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="estado" value="{{ val }}">
+                                    <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 transition-colors">{{ label }}</button>
+                                </form>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-16 text-gray-400">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    No hay reportes que coincidan con tu búsqueda
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

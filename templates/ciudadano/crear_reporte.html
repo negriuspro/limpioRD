@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Nuevo Reporte — LimpioRD{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  #mini-map { height: 250px; border-radius: 12px; margin-top: 10px; border: 1px solid #e2e8f0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-gray-900 leading-tight">Reportar acumulación<br> de basura</h1>
+            <p class="text-sm text-gray-400 mt-2">Danos los detalles para que el ayuntamiento actúe.</p>
+        </div>
+        <a href="{% url 'reportes:dashboard_ciudadano' %}" class="text-xs font-bold text-gray-400 hover:text-gray-600">Cancelar</a>
+    </div>
+
+    <form method="POST" class="grid lg:grid-cols-5 gap-8">
+        {% csrf_token %}
+        <div class="lg:col-span-3 space-y-6">
+            <!-- Municipio Selection -->
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-2">Municipio</label>
+                <select name="municipio" required class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none">
+                    <option value="">Selecciona tu municipio...</option>
+                    {% for mun in municipios %}
+                    <option value="{{ mun.id }}">{{ mun.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Categoria Selection -->
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-2">Tipo de Residuo</label>
+                <div class="grid grid-cols-2 gap-3" x-data="{selected:0}">
+                    {% for cat in categorias %}
+                    <label @click="selected={{ cat.id }}" :class="selected=={{ cat.id }} ? 'bg-primary-600 border-primary-600 text-white' : 'bg-white border-gray-100 text-gray-600'" 
+                           class="border-2 rounded-2xl p-4 cursor-pointer transition-all flex flex-col items-center hover:border-primary-400 group">
+                        <input type="radio" name="categoria" value="{{ cat.id }}" class="hidden" required>
+                        <div :class="selected=={{ cat.id }} ? 'text-white' : 'text-primary-600'" class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </div>
+                        <span class="text-[11px] font-bold uppercase tracking-widest text-center">{{ cat.nombre }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-black text-gray-900 mb-2">Descripción del problema</label>
+                <textarea name="description" rows="4" required placeholder="Describe brevemente lo que ocurre... Ej: Hay una gran acumulación de plásticos fuera del contenedor."
+                          class="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400"></textarea>
+            </div>
+
+            <!-- Barrio Context -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-black text-gray-900 mb-2">Barrio / Ensanche</label>
+                    <input type="text" name="barrio" placeholder="Ej: Los Prados"
+                           class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-black text-gray-900 mb-2">Referencia</label>
+                    <input type="text" name="referencia" placeholder="Ej: Junto al colmado"
+                           class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400">
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Location -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm overflow-hidden">
+                <div class="text-sm font-black text-gray-900 mb-4">Ubicación del problema</div>
+                <div id="mini-map"></div>
+                <p class="text-[11px] text-gray-400 mt-4 leading-relaxed">
+                    Mueve el pin en el mapa para indicar el lugar exacto. Al reportar, tu ubicación nos ayuda a priorizar el caso.
+                </p>
+                <input type="hidden" name="latitud" id="lat-input" value="18.4861">
+                <input type="hidden" name="longitud" id="lng-input" value="-69.9312">
+            </div>
+
+            <button type="submit" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                Enviar Reporte →
+            </button>
+            <p class="text-center text-[10px] text-gray-400 px-8 leading-tight">
+                Al enviar el reporte, confirmas que la información es verídica y ganas 10 puntos LimpioRD.
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('mini-map').setView([18.4861, -69.9312], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap contributors', maxZoom: 19
+    }).addTo(map);
+
+    var marker = L.marker([18.4861, -69.9312], { draggable: true }).addTo(map);
+    
+    marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        document.getElementById('lat-input').value = pos.lat;
+        document.getElementById('lng-input').value = pos.lng;
+    });
+
+    // Intentar obtener ubicación actual
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            var coords = [pos.coords.latitude, pos.coords.longitude];
+            map.setView(coords, 16);
+            marker.setLatLng(coords);
+            document.getElementById('lat-input').value = pos.coords.latitude;
+            document.getElementById('lng-input').value = pos.coords.longitude;
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos de caché y compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Base de datos (opcional, la ignoro por seguridad)
+db.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Archivos estáticos
+static/
+media/
+
+# IDEs
+.idea/
+.vscode/

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Mis Puntos — LimpioRD{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
+        <!-- Main Stats Card -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-dark-900 text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden group">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-primary-600/30 rounded-full blur-3xl group-hover:bg-primary-500/40 transition-colors"></div>
+                <div class="relative z-10 text-center">
+                    <div class="w-24 h-24 bg-primary-600/20 rounded-full flex items-center justify-center mx-auto mb-8 text-4xl shadow-xl shadow-green-950/50">🌿</div>
+                    <div class="text-[11px] font-black tracking-widest uppercase text-primary-400 mb-2">Puntos Disponibles</div>
+                    <div class="text-6xl font-black mb-10">{{ perfil.puntos_disponibles }}</div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs font-bold px-4">
+                            <span class="text-gray-400">Total Ganados</span>
+                            <span class="text-white">{{ perfil.puntos_totales }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs font-bold px-4 border-t border-gray-800 pt-4">
+                            <span class="text-gray-400">Total Canjeados</span>
+                            <span class="text-white">{{ perfil.puntos_canjeados }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rank Hook -->
+            <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+                <h4 class="font-black text-gray-900 mb-2">Clasificación Global</h4>
+                <p class="text-sm text-gray-400 mb-6 font-medium">Estás en el puesto #{{ perfil.posicion_ranking|default:"1,240" }} del ranking de ciudadanos verdes.</p>
+                <div class="flex items-center gap-2">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-200"></div>
+                        <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-300"></div>
+                        <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-200"></div>
+                    </div>
+                    <span class="text-xs font-bold text-primary-600">+1.2k ciudadanos activos</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- History/Recompensas Section -->
+        <div class="lg:col-span-2 space-y-8">
+            <div x-data="{tab:'history'}">
+                <div class="flex items-center gap-6 mb-8 border-b border-gray-100 pb-4">
+                    <button @click="tab='history'" :class="tab==='history' ? 'text-gray-900 border-b-2 border-primary-600' : 'text-gray-400'" class="pb-4 px-2 font-black text-sm uppercase tracking-widest transition-all">
+                        Historial de Puntos
+                    </button>
+                    <button @click="tab='rewards'" :class="tab==='rewards' ? 'text-gray-900 border-b-2 border-primary-600' : 'text-gray-400'" class="pb-4 px-2 font-black text-sm uppercase tracking-widest transition-all">
+                        Recompensas
+                    </button>
+                </div>
+
+                <!-- History Tab -->
+                <div x-show="tab==='history'" x-transition class="space-y-4">
+                    {% for t in transacciones %}
+                    <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:scale-[1.01] transition-transform">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+                                {% if t.tipo == 'ganancia' %}🌿{% else %}🎁{% endif %}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900">{{ t.descripcion }}</div>
+                                <div class="text-[10px] uppercase font-black tracking-widest text-gray-300 mt-1">{{ t.creado_en|date:"d M Y, H:i" }}</div>
+                            </div>
+                        </div>
+                        <div class="{% if t.puntos > 0 %}text-primary-600{% else %}text-red-600{% endif %} font-black text-lg">
+                            {% if t.puntos > 0 %}+{% endif %}{{ t.puntos }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-24 text-gray-400">No tienes transacciones registradas</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Rewards Tab (Static Hook) -->
+                <div x-show="tab==='rewards'" x-transition class="grid md:grid-cols-2 gap-4">
+                    <!-- Reward Card -->
+                    <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm relative group overflow-hidden">
+                        <div class="mb-6 w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">🛒</div>
+                        <h4 class="text-xl font-black text-gray-900 mb-1 leading-tight">Vale de 500 RD$</h4>
+                        <p class="text-xs text-gray-400 font-bold mb-6">Supermercados Nacional</p>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-primary-600 font-black text-lg">2,000 Puntos</span>
+                            <button class="bg-gray-100 text-gray-400 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest">Bloqueado</button>
+                        </div>
+                    </div>
+                    <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm relative group overflow-hidden">
+                        <div class="mb-6 w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">🎟️</div>
+                        <h4 class="text-xl font-black text-gray-900 mb-1 leading-tight">2x1 en Cine</h4>
+                        <p class="text-xs text-gray-400 font-bold mb-6">Caribbean Cinemas</p>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-primary-600 font-black text-lg">800 Puntos</span>
+                            <button class="bg-gray-100 text-gray-400 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest">Bloqueado</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

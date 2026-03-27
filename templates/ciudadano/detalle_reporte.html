@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Reporte Mensaje — LimpioRD{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'reportes:mis_reportes' %}" class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-black text-gray-900 leading-tight">Detalles del Reporte</h1>
+            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Ref: #{{ reporte.id|stringformat:".8s" }}</p>
+        </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-10">
+        <!-- Main Content -->
+        <div class="space-y-10">
+            <!-- Status Detail -->
+            <div class="bg-dark-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary-600/20 rounded-full blur-3xl"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="text-xs font-black uppercase tracking-widest text-primary-400">Estado Actual</div>
+                        <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest
+                            {% if reporte.estado == 'pendiente' %}bg-red-600 text-white
+                            {% elif reporte.estado == 'resuelto' %}bg-green-600 text-white
+                            {% else %}bg-yellow-500 text-white{% endif %}">
+                            {{ reporte.get_estado_display }}
+                        </span>
+                    </div>
+                    {% if reporte.estado == 'pendiente' %}
+                    <h3 class="text-2xl font-black mb-2">Estamos revisando tu reporte</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">Personal del ayuntamiento de {{ reporte.municipio.nombre }} lo evaluará en breve.</p>
+                    {% elif reporte.estado == 'resuelto' %}
+                    <h3 class="text-2xl font-black mb-2">¡Reporte Resuelto! 🎉</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">El problema ha sido corregido. Gracias por tu ayuda, ganaste {{ reporte.puntos_otorgados }} puntos.</p>
+                    {% else %}
+                    <h3 class="text-2xl font-black mb-2">Personal municipal actuando</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed">Se ha asignado un equipo para resolver esta acumulación de residuos.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Details Table -->
+            <div class="space-y-4">
+                <h4 class="font-bold text-gray-900 px-2">Información enviada</h4>
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-6">
+                    <div>
+                        <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Descripción</div>
+                        <p class="text-sm text-gray-600 leading-relaxed font-medium">{{ reporte.descripcion }}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Barrio</div>
+                            <p class="text-sm text-gray-600 font-bold">{{ reporte.barrio|default:"—" }}</p>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Municipio</div>
+                            <p class="text-sm text-gray-600 font-bold">{{ reporte.municipio.nombre }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Referencia</div>
+                        <p class="text-sm text-gray-600 font-bold italic">{{ reporte.referencia|default:"—" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Timeline -->
+        <div class="space-y-8">
+            <h4 class="font-bold text-gray-900 px-2">Línea de tiempo</h4>
+            <div class="relative space-y-8 pl-8 before:content-[''] before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                {% for h in historial %}
+                <div class="relative">
+                    <div class="absolute -left-[25px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-primary-600 shadow-lg shadow-green-900/20"></div>
+                    <div class="text-xs font-black text-gray-900 mb-1">Estado: {{ h.estado_nuevo }}</div>
+                    <p class="text-xs text-gray-400 leading-relaxed">{{ h.notas|default:"Tratamiento estándar del reporte." }}</p>
+                    <div class="text-[10px] font-bold text-gray-300 uppercase mt-2">{{ h.creado_en|date:"d M, H:i" }}</div>
+                </div>
+                {% empty %}
+                <div class="relative">
+                    <div class="absolute -left-[25px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-primary-600 shadow-lg shadow-green-900/20 shadow-none"></div>
+                    <div class="text-xs font-black text-gray-900 mb-1">Reporte creado exitosamente</div>
+                    <p class="text-xs text-gray-400 leading-relaxed">Se registró correctamente y está en cola de revisión.</p>
+                    <div class="text-[10px] font-bold text-gray-300 uppercase mt-2">{{ reporte.creado_en|date:"d M, H:i" }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Points card -->
+            <div class="bg-yellow-50 rounded-3xl p-6 border border-yellow-100 flex items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-yellow-900 text-sm">Puntos ganados</h4>
+                    <p class="text-xs text-yellow-700">Por colaborar</p>
+                </div>
+                <div class="text-2xl font-black text-yellow-600">+10 🌱</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
