@@ -2,51 +2,82 @@
 {% block title %}Regístrate — LimpioRD{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-green-950 flex items-center justify-center px-4 py-20">
-    <div class="w-full max-w-lg">
-        <div class="bg-gray-800/80 backdrop-blur rounded-[3rem] border border-gray-700/50 p-10 shadow-2xl relative overflow-hidden group">
-            <div class="absolute -right-20 -top-20 w-64 h-64 bg-primary-600/10 rounded-full blur-3xl group-hover:bg-primary-500/15 transition-all"></div>
-            
-            <div class="relative z-10">
-                <div class="text-center mb-10">
-                    <div class="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-900/40 transform rotate-6 hover:rotate-0 transition-transform">🌿</div>
-                    <h1 class="text-3xl font-black text-white">Únete a LimpioRD</h1>
-                    <p class="text-gray-400 text-sm mt-3">Empieza a limpiar tu ciudad y gana premios únicos.</p>
+<div class="min-h-[100vh] gradient-hero flex items-center justify-center px-4 py-20 relative overflow-hidden">
+    <!-- Grid Pattern Overlay -->
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMGg0MHY0MEgwem0zOSAzOVYxam0tMzggMHYtMzh6bTEgMGgzOHYxbS0zOC0zaDM4djF6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+Cjwvc3ZnPg==')] opacity-20"></div>
+    
+    <!-- Background blobs -->
+    <div class="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-primary-500/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+    <div class="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-emerald-700/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s"></div>
+
+    <div class="w-full max-w-[500px] relative z-10 animate-fade-up">
+        <!-- Card -->
+        <div class="glass-dark rounded-[2.5rem] border border-white/10 p-10 shadow-2xl shadow-black/50 relative overflow-hidden">
+            <!-- Decorative accent line -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-primary-500 to-primary-400"></div>
+
+            <!-- Logo -->
+            <div class="text-center mb-8 mt-2">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary-500/30 border border-primary-400/20 transform rotate-3 hover:rotate-0 transition-all duration-300">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                </div>
+                <h1 class="text-3xl font-black text-white tracking-tight">Crea tu cuenta</h1>
+                <p class="text-emerald-100/60 text-sm mt-2 font-medium">Únete y empieza a mejorar tu municipio</p>
+            </div>
+
+            <form method="POST" action="{% url 'accounts:signup' %}" class="space-y-6">
+                {% csrf_token %}
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div class="space-y-1.5 group">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Nombre</label>
+                        <input type="text" name="nombre" required placeholder="Juan"
+                               class="w-full px-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                    </div>
+                    <!-- Apellido -->
+                    <div class="space-y-1.5 group">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Apellido</label>
+                        <input type="text" name="apellido" required placeholder="Pérez"
+                               class="w-full px-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                    </div>
                 </div>
 
-                <form method="POST" action="{% url 'accounts:signup' %}" class="grid md:grid-cols-2 gap-6">
-                    {% csrf_token %}
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Nombre</label>
-                        <input type="text" name="nombre" required placeholder="Ej: Juan"
-                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Apellido</label>
-                        <input type="text" name="apellido" required placeholder="Ej: Pérez"
-                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Correo Electrónico</label>
+                <!-- Email -->
+                <div class="space-y-1.5 relative group">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Correo Electrónico</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         <input type="email" name="email" required placeholder="juan@ejemplo.com"
-                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
+                               class="w-full pl-12 pr-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-primary-400 mb-2 px-2">Contraseña</label>
-                        <input type="password" name="password" required placeholder="••••••••"
-                               class="w-full bg-gray-700/50 border border-transparent border-b-gray-600 text-white placeholder-gray-500 px-5 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm">
-                    </div>
+                </div>
 
-                    <div class="md:col-span-2 pt-6">
-                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-black py-4 rounded-[1.5rem] shadow-xl shadow-green-950/50 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                            Crear Cuenta Nueva →
+                <!-- Password -->
+                <div class="space-y-1.5 relative group" x-data="{showPass:false}">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Contraseña</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <input :type="showPass ? 'text' : 'password'" name="password" required placeholder="••••••••"
+                               class="w-full pl-12 pr-12 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner tracking-widest">
+                        <button type="button" @click="showPass=!showPass" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none">
+                            <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                         </button>
                     </div>
-                </form>
-
-                <div class="text-center mt-10">
-                    <p class="text-xs text-gray-500">¿Ya tienes cuenta? <a href="{% url 'accounts:login' %}" class="text-primary-400 font-bold hover:underline">Inicia Sesión</a></p>
                 </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-1 text-sm flex justify-center items-center gap-2 group">
+                        <span>Completar Registro</span>
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-400 pt-6 border-t border-gray-700/50">
+                    ¿Ya tienes una cuenta? <a href="{% url 'accounts:login' %}" class="text-white hover:text-primary-400 font-semibold transition-colors">Inicia Sesión</a>
+                </p>
             </div>
         </div>
     </div>

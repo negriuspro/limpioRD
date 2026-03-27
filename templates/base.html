@@ -7,7 +7,7 @@
     <meta name="description" content="LimpioRD: Plataforma digital para reportar y gestionar residuos en la República Dominicana.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- HTMX for smooth navigation -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -15,18 +15,20 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                        primary:   { DEFAULT:'#16A34A', 50:'#f0fdf4', 100:'#dcfce7', 500:'#22c55e', 600:'#16a34a', 700:'#15803d', 800:'#166534', 900:'#14532d' },
-                        accent:    { DEFAULT:'#F59E0B', 300:'#fcd34d', 400:'#fbbf24', 500:'#f59e0b' },
+                        primary:   { DEFAULT:'#10b981', 50:'#ecfdf5', 100:'#d1fae5', 500:'#10b981', 600:'#059669', 700:'#047857', 800:'#065f46', 900:'#064e3b' },
+                        accent:    { DEFAULT:'#f59e0b', 300:'#fcd34d', 400:'#fbbf24', 500:'#f59e0b' },
                         dark:      { DEFAULT:'#0f172a', 800:'#1e293b', 900:'#0f172a' }
                     },
                     animation: {
-                        'fade-up': 'fadeUp 0.6s ease-out forwards',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite',
+                        'fade-up': 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
                     },
                     keyframes: {
-                        fadeUp: { '0%': {opacity:'0', transform:'translateY(20px)'}, '100%': {opacity:'1', transform:'translateY(0)'} }
+                        fadeUp: { '0%': {opacity:'0', transform:'translateY(20px)'}, '100%': {opacity:'1', transform:'translateY(0)'} },
+                        float: { '0%, 100%': {transform:'translateY(0)'}, '50%': {transform:'translateY(-10px)'} }
                     }
                 }
             }
@@ -34,22 +36,48 @@
     </script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Leaflet Map Global -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-hero { background: linear-gradient(135deg, #0f172a 0%, #166534 50%, #0f172a 100%); }
-        .glass { background: rgba(255,255,255,0.07); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
-        .stat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(22,163,74,0.15); }
-        .nav-link { position: relative; }
-        .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px; background:#22c55e; transition: width 0.3s ease; }
+        body { font-family: 'Outfit', sans-serif; background-color: #f1f5f9; background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .gradient-hero { background: linear-gradient(135deg, #0f172a 0%, #064e3b 80%, #022c22 100%); }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-dark { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 2px solid #10b981; }
+        
+        /* High Contrast Sections */
+        .section-dark { background: #0f172a; color: white; }
+        .card-premium { background: white; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 1.5rem; }
+        .card-premium:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-color: #10b981; }
+        
+        /* Form Contrasts */
+        input, select, textarea { border: 1.5px solid #cbd5e1 !important; background-color: #f8fafc !important; color: #0f172a !important; }
+        input:focus, select:focus, textarea:focus { border-color: #10b981 !important; ring-color: rgba(16, 185, 129, 0.2) !important; background-color: #ffffff !important; }
+        label { color: #1e293b !important; font-weight: 700 !important; }
+
+        /* Smooth transitions */
+        .btn-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4); }
+        
+        .nav-link { position: relative; color: #94a3b8; transition: color 0.3s; padding: 0.5rem 0; }
+        .nav-link:hover { color: #f1f5f9; }
+        .nav-link::after { content:''; position:absolute; bottom:0; left:0; width:0; height:2px; background:#10b981; transition: width 0.3s; border-radius: 2px; }
         .nav-link:hover::after { width:100%; }
-        .sidebar-active { background: linear-gradient(90deg, rgba(22,163,74,0.2), transparent); border-left: 3px solid #16a34a; }
+        
+        /* Map fixes */
+        .leaflet-container { z-index: 10 !important; border-radius: 1.5rem !important; overflow: hidden; border: 2px solid #cbd5e1; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 5px; border: 2px solid #f1f5f9; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans" x-data="{ sidebarOpen: false, userMenuOpen: false }" hx-boost="true">
+<body class="text-slate-900 font-sans antialiased selection:bg-primary-500 selection:text-white" x-data="{ sidebarOpen: false, userMenuOpen: false }" hx-boost="true">
     <script>
-        // Force internal links to stay in same tab as requested
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
             if (link && link.href.startsWith(window.location.origin)) {
@@ -59,55 +87,66 @@
     </script>
 
     <!-- Navbar -->
-    <nav class="bg-dark-900 text-white shadow-xl sticky top-0 z-50 border-b border-gray-800">
+    <nav class="fixed w-full z-50 glass-dark transition-all duration-300" x-data="{ scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-20 transition-all duration-300" :class="{'h-16': scrolled}">
                 <!-- Logo -->
-                <a href="/" class="flex items-center space-x-2 group">
-                    <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-500 transition-colors">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:shadow-primary-500/50 group-hover:scale-105 transition-all duration-300 transform">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
                     </div>
-                    <span class="text-xl font-bold tracking-tight">Limpio<span class="text-primary-500">RD</span></span>
+                    <span class="text-2xl font-black tracking-tight text-white">Limpio<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">RD</span></span>
                 </a>
 
                 <!-- Nav links + user -->
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-8">
                     {% if user.is_authenticated %}
                         {% if user.rol == 'ciudadano' %}
-                            <a href="/ciudadano/dashboard/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Dashboard</a>
-                            <a href="/ciudadano/crear/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Reportar</a>
-                            <a href="/ciudadano/mis-puntos/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Puntos</a>
+                            <a href="/ciudadano/dashboard/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Dashboard</a>
+                            <a href="/ciudadano/crear/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Reportar</a>
+                            <a href="/ciudadano/mis-puntos/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Mis Puntos</a>
                         {% else %}
-                            <a href="/panel/dashboard/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Panel</a>
-                            <a href="/panel/mapa/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Mapa</a>
-                            <a href="/panel/reportes/" class="nav-link text-gray-300 hover:text-white text-sm font-medium transition-colors">Gestión</a>
+                            <a href="/panel/dashboard/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Panel</a>
+                            <a href="/panel/mapa/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Mapa</a>
+                            <a href="/panel/reportes/" class="nav-link text-gray-300 hover:text-white text-sm font-semibold transition-colors">Gestión</a>
                         {% endif %}
 
                         <!-- User dropdown -->
-                        <div class="relative" x-data="{open:false}">
-                            <button @click="open=!open" class="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-full pl-3 pr-4 py-2 transition-colors text-sm">
-                                <div class="w-7 h-7 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-3 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-full pl-2 pr-4 py-1.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500/50 hover:shadow-lg">
+                                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
                                     {{ user.nombre|first|upper }}
                                 </div>
-                                <span class="text-gray-200">{{ user.nombre }}</span>
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                <span class="text-gray-200 font-medium text-sm">{{ user.nombre }}</span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform duration-300" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
-                            <div x-show="open" @click.outside="open=false" x-transition class="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl py-1 z-50">
-                                <div class="px-4 py-2 border-b border-gray-700">
-                                    <p class="text-xs text-gray-400">{{ user.get_rol_display }}</p>
-                                    <p class="text-sm text-white font-medium truncate">{{ user.email }}</p>
+                            <div x-show="open" @click.outside="open = false" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                 x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                 class="absolute right-0 mt-3 w-56 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl shadow-2xl shadow-black/50 py-2 z-50 overflow-hidden" style="display: none;">
+                                <div class="px-5 py-3 border-b border-gray-800 bg-gray-800/20">
+                                    <p class="text-xs text-primary-400 font-semibold uppercase tracking-wider mb-1">{{ user.get_rol_display }}</p>
+                                    <p class="text-sm text-gray-200 font-medium truncate">{{ user.email }}</p>
                                 </div>
                                 <form method="post" action="/accounts/logout/">
                                     {% csrf_token %}
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition-colors">
-                                        Cerrar Sesión
+                                    <button type="submit" class="w-full text-left px-5 py-3 text-sm text-red-400 font-medium hover:bg-gray-800/50 hover:text-red-300 transition-colors flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                        <span>Cerrar Sesión</span>
                                     </button>
                                 </form>
                             </div>
                         </div>
                     {% else %}
-                        <a href="/accounts/login/" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary-900/30">
-                            Iniciar Sesión
+                        <a href="/accounts/login/" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300">
+                            Acceder
+                        </a>
+                        <a href="/accounts/signup/" class="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-0.5 btn-hover">
+                            Regístrate
                         </a>
                     {% endif %}
                 </div>
@@ -117,33 +156,70 @@
 
     <!-- Flash Messages -->
     {% if messages %}
-    <div class="fixed top-20 right-4 z-50 space-y-2 max-w-sm" x-data>
+    <div class="fixed top-24 right-6 z-50 space-y-3 max-w-md w-full" x-data>
         {% for message in messages %}
-        <div x-data="{show:true}" x-show="show" x-transition.duration.300ms
-             class="flex items-center justify-between p-4 rounded-xl shadow-2xl border text-sm font-medium
-             {% if message.tags == 'error' %}bg-red-950 border-red-800 text-red-300
-             {% elif message.tags == 'success' %}bg-green-950 border-green-800 text-green-300
-             {% else %}bg-blue-950 border-blue-800 text-blue-300{% endif %}">
-            <span>{{ message }}</span>
-            <button @click="show=false" class="ml-3 opacity-70 hover:opacity-100 text-lg leading-none">&times;</button>
+        <div x-data="{show: true}" x-show="show" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-8"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="flex items-start p-4 rounded-2xl shadow-xl shadow-black/10 border backdrop-blur-md
+             {% if message.tags == 'error' %}bg-red-50/90 border-red-200 text-red-800
+             {% elif message.tags == 'success' %}bg-emerald-50/90 border-emerald-200 text-emerald-800
+             {% else %}bg-blue-50/90 border-blue-200 text-blue-800{% endif %}">
+            
+            <div class="flex-shrink-0 mt-0.5">
+                {% if message.tags == 'error' %}
+                    <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {% elif message.tags == 'success' %}
+                    <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {% else %}
+                    <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {% endif %}
+            </div>
+            <div class="ml-3 w-0 flex-1 pt-0.5">
+                <p class="text-sm font-medium">{{ message }}</p>
+            </div>
+            <div class="ml-4 flex-shrink-0 flex">
+                <button @click="show = false" class="inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-md">
+                    <span class="sr-only">Cerrar</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
     <!-- Main Content -->
-    <main>{% block content %}{% endblock %}</main>
+    <main class="min-h-screen">{% block content %}{% endblock %}</main>
 
     <!-- Footer -->
-    <footer class="bg-dark-900 text-gray-500 py-8 border-t border-gray-800 mt-16">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-2">
-                <div class="w-6 h-6 bg-primary-600 rounded-md flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945"/></svg>
+    <footer class="bg-dark-900 border-t border-gray-800 py-12 relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-px bg-gradient-to-r from-transparent via-primary-500/50 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945"/></svg>
+                    </div>
+                    <div>
+                        <span class="text-xl font-black tracking-tight text-white block leading-none">Limpio<span class="text-primary-500">RD</span></span>
+                        <span class="text-gray-400 text-xs mt-1 block">Gestión Inteligente de Residuos</span>
+                    </div>
                 </div>
-                <span class="text-white font-semibold text-sm">Limpio<span class="text-primary-500">RD</span></span>
+                <div class="flex space-x-6 text-gray-400">
+                    <a href="#" class="hover:text-primary-400 transition-colors">Términos</a>
+                    <a href="#" class="hover:text-primary-400 transition-colors">Privacidad</a>
+                    <a href="#" class="hover:text-primary-400 transition-colors">Contacto</a>
+                </div>
             </div>
-            <p class="text-xs">&copy; 2026 LimpioRD. Gestión inteligente de residuos — República Dominicana.</p>
+            <div class="mt-8 pt-8 border-t border-gray-800/50 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>&copy; 2026 LimpioRD. Todos los derechos reservados.</p>
+                <p class="mt-2 md:mt-0 flex items-center gap-1">Diseñado con <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg> en República Dominicana</p>
+            </div>
         </div>
     </footer>
 </body>

@@ -2,50 +2,79 @@
 {% block title %}Nuevo Reporte — LimpioRD{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  #mini-map { height: 250px; border-radius: 12px; margin-top: 10px; border: 1px solid #e2e8f0; }
+  #mini-map { 
+    height: 400px; 
+    width: 100%;
+    border-radius: 1.5rem; 
+    margin-top: 1rem; 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="min-h-screen bg-slate-100/50 pb-20"> <!-- Added background color for contrast -->
 <div class="max-w-4xl mx-auto px-4 py-12">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-10 pb-6 border-b border-slate-200">
         <div>
-            <h1 class="text-3xl font-black text-gray-900 leading-tight">Reportar acumulación<br> de basura</h1>
-            <p class="text-sm text-gray-400 mt-2">Danos los detalles para que el ayuntamiento actúe.</p>
+            <h1 class="text-4xl font-black text-slate-900 leading-tight tracking-tight">Reportar Incidencia</h1>
+            <p class="text-sm text-slate-500 font-medium mt-1">Usa el mapa para marcar el punto exacto del problema.</p>
         </div>
-        <a href="{% url 'reportes:dashboard_ciudadano' %}" class="text-xs font-bold text-gray-400 hover:text-gray-600">Cancelar</a>
+        <a href="{% url 'reportes:dashboard_ciudadano' %}" class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm">
+            Cancelar y volver
+        </a>
     </div>
 
-    <form method="POST" class="grid lg:grid-cols-5 gap-8">
+    <form method="POST" class="grid lg:grid-cols-5 gap-10">
         {% csrf_token %}
         <div class="lg:col-span-3 space-y-6">
             <!-- Municipio Selection -->
             <div>
-                <label class="block text-sm font-black text-gray-900 mb-2">Municipio</label>
-                <select name="municipio" required class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none">
-                    <option value="">Selecciona tu municipio...</option>
-                    {% for mun in municipios %}
-                    <option value="{{ mun.id }}">{{ mun.nombre }}</option>
-                    {% endfor %}
-                </select>
+                <label class="block text-sm font-black text-slate-700 mb-2">Municipio</label>
+                <div class="relative">
+                    <select name="municipio" id="municipio-select" required 
+                            class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 appearance-none transition-all">
+                        <option value="">Selecciona tu municipio...</option>
+                        {% for mun in municipios %}
+                        <option value="{{ mun.id }}" data-nombre="{{ mun.nombre }}">{{ mun.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
             </div>
 
             <!-- Categoria Selection -->
-            <div>
-                <label class="block text-sm font-black text-gray-900 mb-2">Tipo de Residuo</label>
-                <div class="grid grid-cols-2 gap-3" x-data="{selected:0}">
+            <div x-data="{ selectedCat: '' }">
+                <label class="block text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
+                    Tipo de Residuo
+                    <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full text-slate-500">Requerido</span>
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {% for cat in categorias %}
-                    <label @click="selected={{ cat.id }}" :class="selected=={{ cat.id }} ? 'bg-primary-600 border-primary-600 text-white' : 'bg-white border-gray-100 text-gray-600'" 
-                           class="border-2 rounded-2xl p-4 cursor-pointer transition-all flex flex-col items-center hover:border-primary-400 group">
-                        <input type="radio" name="categoria" value="{{ cat.id }}" class="hidden" required>
-                        <div :class="selected=={{ cat.id }} ? 'text-white' : 'text-primary-600'" class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <label 
+                        :class="selectedCat == '{{ cat.id }}' ? 'border-primary-500 bg-primary-50 ring-4 ring-primary-500/10' : 'border-slate-200 bg-white hover:border-slate-300'" 
+                        class="relative border-2 rounded-3xl p-5 cursor-pointer transition-all flex flex-col items-center justify-center text-center group"
+                    >
+                        <input type="radio" name="categoria" value="{{ cat.id }}" x-model="selectedCat" class="hidden" required>
+                        
+                        <div 
+                            :class="selectedCat == '{{ cat.id }}' ? 'bg-primary-500 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'" 
+                            class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-colors"
+                        >
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </div>
-                        <span class="text-[11px] font-bold uppercase tracking-widest text-center">{{ cat.nombre }}</span>
+                        <span class="text-[12px] font-extrabold uppercase tracking-tight" :class="selectedCat == '{{ cat.id }}' ? 'text-primary-700' : 'text-slate-600'">{{ cat.nombre }}</span>
+                        
+                        <!-- Checkmark -->
+                        <template x-if="selectedCat == '{{ cat.id }}'">
+                            <div class="absolute top-2 right-2 text-primary-500 animate-fade-up">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            </div>
+                        </template>
                     </label>
                     {% endfor %}
                 </div>
@@ -53,72 +82,140 @@
 
             <!-- Description -->
             <div>
-                <label class="block text-sm font-black text-gray-900 mb-2">Descripción del problema</label>
-                <textarea name="description" rows="4" required placeholder="Describe brevemente lo que ocurre... Ej: Hay una gran acumulación de plásticos fuera del contenedor."
-                          class="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400"></textarea>
+                <label class="block text-sm font-black text-slate-700 mb-2">Descripción Detallada</label>
+                <textarea name="description" rows="5" required 
+                          placeholder="Ej: Gran volumen de botellas y cartones en la acera lateral del edificio azul."
+                          class="w-full bg-slate-50 border-2 border-slate-200 rounded-3xl px-6 py-5 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all"></textarea>
             </div>
 
             <!-- Barrio Context -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-sm font-black text-gray-900 mb-2">Barrio / Ensanche</label>
-                    <input type="text" name="barrio" placeholder="Ej: Los Prados"
-                           class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400">
+                    <label class="block text-sm font-black text-slate-700 mb-2">Barrio / Sector</label>
+                    <input type="text" name="barrio" id="barrio-input" placeholder="Ej: Los Prados"
+                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-black text-gray-900 mb-2">Referencia</label>
-                    <input type="text" name="referencia" placeholder="Ej: Junto al colmado"
-                           class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 placeholder-gray-400">
+                    <label class="block text-sm font-black text-slate-700 mb-2">Punto de referencia</label>
+                    <input type="text" name="referencia" placeholder="Ej: Frente al Supermercado..."
+                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all">
                 </div>
             </div>
         </div>
 
         <!-- Sidebar / Location -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm overflow-hidden">
-                <div class="text-sm font-black text-gray-900 mb-4">Ubicación del problema</div>
+            <div class="card-premium p-6 overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm font-black text-slate-700">Ubicación exacta</div>
+                    <div id="geocoding-loader" class="hidden">
+                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-primary-500 border-t-transparent"></div>
+                    </div>
+                </div>
                 <div id="mini-map"></div>
-                <p class="text-[11px] text-gray-400 mt-4 leading-relaxed">
-                    Mueve el pin en el mapa para indicar el lugar exacto. Al reportar, tu ubicación nos ayuda a priorizar el caso.
-                </p>
+                <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+                        <span class="text-primary-600 font-bold block mb-1">TIP DE USO:</span>
+                        Arrastra el pin al lugar del problema. Intentaremos detectar tu municipio y barrio automáticamente ahorrándote tiempo.
+                    </p>
+                </div>
                 <input type="hidden" name="latitud" id="lat-input" value="18.4861">
                 <input type="hidden" name="longitud" id="lng-input" value="-69.9312">
             </div>
 
-            <button type="submit" class="w-full bg-primary-600 hover:bg-primary-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                Enviar Reporte →
+            <button type="submit" class="w-full gradient-hero hover:opacity-90 text-white font-black py-5 rounded-2xl shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98] border border-primary-500/20">
+                Enviar Reporte Ciudadano →
             </button>
-            <p class="text-center text-[10px] text-gray-400 px-8 leading-tight">
-                Al enviar el reporte, confirmas que la información es verídica y ganas 10 puntos LimpioRD.
-            </p>
+            
+            <div class="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex items-center gap-4">
+                <div class="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center text-white shrink-0">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                </div>
+                <p class="text-[12px] font-bold text-primary-800 leading-tight">
+                    Recuerda: Subir una foto real aumenta la velocidad de resolución y tus puntos.
+                </p>
+            </div>
         </div>
     </form>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var map = L.map('mini-map').setView([18.4861, -69.9312], 14);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '©OpenStreetMap contributors', maxZoom: 19
-    }).addTo(map);
+    var defaultLat = 18.4861;
+    var defaultLng = -69.9312;
 
-    var marker = L.marker([18.4861, -69.9312], { draggable: true }).addTo(map);
-    
-    marker.on('dragend', function(e) {
-        var pos = marker.getLatLng();
-        document.getElementById('lat-input').value = pos.lat;
-        document.getElementById('lng-input').value = pos.lng;
+    var map = L.map('mini-map', {
+        center: [defaultLat, defaultLng],
+        zoom: 13,
+        zoomControl: true,
+        scrollWheelZoom: false
     });
 
-    // Intentar obtener ubicación actual
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    var marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+    setTimeout(function(){ map.invalidateSize(); }, 400);
+
+    function reverseGeocode(lat, lng) {
+        document.getElementById('geocoding-loader').classList.remove('hidden');
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+            headers: { 'Accept-Language': 'es' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.address) {
+                // Autocompletar Barrio
+                const barrio = data.address.suburb || data.address.neighbourhood || data.address.residential || '';
+                if (barrio) {
+                    document.getElementById('barrio-input').value = barrio;
+                }
+                
+                // Intentar emparejar Municipio con mayor precisión
+                const city = (data.address.city || data.address.town || data.address.village || data.address.municipality || '').toLowerCase();
+                const province = (data.address.province || data.address.state || '').toLowerCase();
+
+                if (city || province) {
+                    const select = document.getElementById('municipio-select');
+                    for (let i = 0; i < select.options.length; i++) {
+                        const opt = select.options[i];
+                        const normMun = opt.getAttribute('data-nombre')?.toLowerCase() || '---';
+                        
+                        // Si el nombre del municipio está en la ciudad o en la provincia
+                        if (city.includes(normMun) || province.includes(normMun) || normMun.includes(city)) {
+                            select.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        })
+        .finally(() => {
+            document.getElementById('geocoding-loader').classList.add('hidden');
+        });
+    }
+
+    function updateInputs(lat, lng) {
+        document.getElementById('lat-input').value = lat.toFixed(6);
+        document.getElementById('lng-input').value = lng.toFixed(6);
+        reverseGeocode(lat, lng);
+    }
+
+    marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        updateInputs(pos.lat, pos.lng);
+    });
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(pos) {
             var coords = [pos.coords.latitude, pos.coords.longitude];
             map.setView(coords, 16);
             marker.setLatLng(coords);
-            document.getElementById('lat-input').value = pos.coords.latitude;
-            document.getElementById('lng-input').value = pos.coords.longitude;
-        });
+            updateInputs(coords[0], coords[1]);
+        }, null, { enableHighAccuracy: true });
     }
 });
 </script>

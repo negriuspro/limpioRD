@@ -94,6 +94,8 @@ def crear_reporte(request):
 
 
 # ── Mis Reportes ────────────────────────────────────────────────────────────
+from django.core.paginator import Paginator
+
 @login_required
 def mis_reportes(request):
     estado = request.GET.get('estado', '')
@@ -102,8 +104,12 @@ def mis_reportes(request):
         qs = qs.filter(estado=estado)
     qs = qs.order_by('-creado_en')
 
+    paginator = Paginator(qs, 10) # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'ciudadano/mis_reportes.html', {
-        'reportes': qs,
+        'reportes': page_obj,
         'estados': Reporte.ESTADOS,
         'estado_sel': estado,
     })

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'analytics',
     'publicidad',
     'api',
+    'negocios',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'core.middleware.AuditUserMiddleware',
     # 'core.middleware.RoleBasedAccessMiddleware',           # Middleware personalizado de roles
 ]
 

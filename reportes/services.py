@@ -4,11 +4,13 @@ from django.utils import timezone
 from .models import Reporte, HistorialEstadoReporte
 from .tasks import notificar_ciudadano_cambio_estado
 
+from core.utils import registrar_auditoria
+
 class ReporteService:
     @staticmethod
     @transaction.atomic
     def crear_reporte(datos, usuario):
-        """Crea un reporte y verifica si es una zona crítica existente."""
+        """Crea un reporte y registra auditoría."""
         reporte = Reporte(
             ciudadano=usuario,
             municipio_id=datos['municipio_id'],
@@ -21,7 +23,10 @@ class ReporteService:
         reporte.urgencia = reporte.calcular_urgencia_automatica()
         reporte.save()
 
-        # Otorgar puntos iniciales (ej: 10 puntos por reportar)
+        # Auditoría
+        registrar_auditoria(usuario, reporte, 'crear', detalles={'categoria': reporte.categoria.nombre})
+
+        # Otorgar puntos
         from gamificacion.services import PuntosService
         PuntosService.otorgar_puntos(usuario, 'reporte_nuevo', reporte=reporte)
 
@@ -40,12 +45,12 @@ class ReporteService:
         
         if nuevo_estado == Reporte.ESTADO_RESUELTO:
             reporte.resuelto_en = timezone.now()
-            # Calcular tiempo de respuesta
             delta = reporte.resuelto_en - reporte.creado_en
             reporte.tiempo_respuesta_horas = delta.total_seconds() / 3600
         
         reporte.save()
 
+        # Registro de historial de estado (ya existía)
         HistorialEstadoReporte.objects.create(
             reporte=reporte,
             estado_anterior=estado_anterior,
@@ -54,7 +59,10 @@ class ReporteService:
             notas=notas
         )
 
-        # Disparar tarea asíncrona (Celery)
+        # Auditoría global extendida
+        registrar_auditoria(usuario_admin, reporte, 'editar', detalles={'nuevo_estado': nuevo_estado, 'notas': notas})
+
+        # Notificar
         notificar_ciudadano_cambio_estado.delay(reporte.id, estado_anterior, nuevo_estado)
 
         return reporte
