@@ -2,76 +2,101 @@
 {% block title %}Iniciar Sesión — LimpioRD{% endblock %}
 
 {% block content %}
-<div class="min-h-[100vh] gradient-hero flex items-center justify-center px-4 py-20 relative overflow-hidden">
-    <!-- Grid Pattern Overlay -->
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMGg0MHY0MEgwem0zOSAzOVYxam0tMzggMHYtMzh6bTEgMGgzOHYxbS0zOC0zaDM4djF6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+Cjwvc3ZnPg==')] opacity-20"></div>
-    
+<div class="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-20 relative overflow-hidden">
     <!-- Background blobs -->
-    <div class="absolute top-[10%] left-[20%] w-[300px] h-[300px] bg-primary-500/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-    <div class="absolute bottom-[10%] right-[20%] w-[300px] h-[300px] bg-emerald-700/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s"></div>
+    <div class="absolute top-[10%] left-[10%] w-[350px] h-[350px] bg-primary-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] bg-emerald-400/10 rounded-full blur-[100px] pointer-events-none"></div>
 
     <div class="w-full max-w-[420px] relative z-10 animate-fade-up">
-        <!-- Card -->
-        <div class="glass-dark rounded-[2.5rem] border border-white/10 p-10 shadow-2xl shadow-black/50 relative overflow-hidden">
-            <!-- Decorative accent line -->
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 via-primary-500 to-emerald-400"></div>
 
-            <!-- Logo -->
-            <div class="text-center mb-10 mt-2">
-                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-primary-500/30 border border-primary-400/20">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
-                </div>
-                <h1 class="text-3xl font-black text-white tracking-tight">Bienvenido</h1>
-                <p class="text-emerald-100/60 text-sm mt-2 font-medium">Ingresa a tu cuenta para continuar</p>
+        <!-- Logo top -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/30">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                </svg>
             </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">Bienvenido de vuelta</h1>
+            <p class="text-slate-500 text-sm mt-1 font-medium">Ingresa a tu cuenta para continuar</p>
+        </div>
 
-            <form method="POST" action="/accounts/login/" class="space-y-6" x-data="{showPass:false}">
+        <!-- Card -->
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative overflow-hidden">
+            <!-- Top accent -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 via-primary-500 to-emerald-400 rounded-t-3xl"></div>
+
+            <form method="POST" action="/accounts/login/" class="space-y-5" x-data="{ showPass: false }">
                 {% csrf_token %}
+
                 <!-- Email -->
-                <div class="space-y-1.5 relative group">
-                    <label class="block text-sm font-semibold text-gray-300 ml-1">Correo electrónico</label>
+                <div class="space-y-1.5 group">
+                    <label class="block text-sm font-bold text-slate-700">Correo electrónico</label>
                     <div class="relative">
-                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
-                        <input type="email" name="email" id="email" required placeholder="correo@ejemplo.com"
-                               class="w-full pl-12 pr-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-500 transition-colors pointer-events-none"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <input type="email" name="email" id="email" required
+                               autocomplete="email"
+                               placeholder="correo@ejemplo.com"
+                               class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 rounded-2xl focus:outline-none focus:border-primary-500 transition-all text-sm font-medium shadow-sm">
                     </div>
                 </div>
+
                 <!-- Password -->
-                <div class="space-y-1.5 relative group">
-                    <div class="flex items-center justify-between ml-1">
-                        <label class="block text-sm font-semibold text-gray-300">Contraseña</label>
-                    </div>
+                <div class="space-y-1.5 group">
+                    <label class="block text-sm font-bold text-slate-700">Contraseña</label>
                     <div class="relative">
-                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <input :type="showPass ? 'text' : 'password'" name="password" id="password" required placeholder="••••••••"
-                               class="w-full pl-12 pr-12 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner tracking-widest">
-                        <button type="button" @click="showPass=!showPass" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none">
-                            <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary-500 transition-colors pointer-events-none"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <input :type="showPass ? 'text' : 'password'" name="password" id="password" required
+                               autocomplete="current-password"
+                               placeholder="••••••••"
+                               class="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 rounded-2xl focus:outline-none focus:border-primary-500 transition-all text-sm font-medium shadow-sm tracking-widest">
+                        <button type="button" @click="showPass = !showPass"
+                                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors">
+                            <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
+
                 <!-- Submit -->
                 <button type="submit"
-                        class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-1 mt-6 text-sm flex justify-center items-center gap-2">
+                        class="w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-0.5 text-sm flex justify-center items-center gap-2 mt-2">
                     <span>Iniciar Sesión</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
                 </button>
             </form>
-            
-            <div class="mt-8 text-center space-y-4">
-                <a href="#" class="text-sm text-primary-400 hover:text-primary-300 transition-colors font-medium">¿Olvidaste tu contraseña?</a>
-                <p class="text-sm text-gray-400 mt-6 pt-6 border-t border-gray-700/50">
-                    ¿No tienes una cuenta? <a href="{% url 'accounts:signup' %}" class="text-white hover:text-primary-400 font-semibold transition-colors">Regístrate</a>
+
+            <!-- Links -->
+            <div class="mt-6 text-center space-y-3">
+                <p class="text-sm text-slate-400 pt-4 border-t border-slate-100">
+                    ¿No tienes cuenta?
+                    <a href="{% url 'accounts:signup' %}" class="text-primary-600 hover:text-primary-700 font-black transition-colors">
+                        Regístrate gratis
+                    </a>
                 </p>
             </div>
         </div>
-        
-        <!-- Hint badge -->
-        <div class="mt-8 flex justify-center">
-            <div class="inline-flex glass-dark px-4 py-2 rounded-full border border-white/5 items-center gap-2 text-xs text-gray-400 font-medium">
-                <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
-                Demo: admin@limpiord.com / Admin123!
+
+        <!-- Seguridad badge -->
+        <div class="mt-6 flex justify-center">
+            <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-full text-xs text-slate-500 font-semibold shadow-sm">
+                <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Conexión segura · LimpioRD &copy; 2026
             </div>
         </div>
     </div>

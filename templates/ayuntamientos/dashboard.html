@@ -1,11 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard — LimpioRD{% endblock %}
 
-{% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %}
-
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
@@ -13,10 +10,17 @@
             <h1 class="text-2xl font-black text-gray-900">Dashboard Municipal</h1>
             <p class="text-sm text-gray-500 mt-1">Resumen de reportes ciudadanos en tiempo real</p>
         </div>
+        <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+            <span id="dash-pulse" style="transition:opacity 0.4s;"
+                  class="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+            LIVE · 60s
+        </span>
         <a href="/panel/mapa/" class="inline-flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:shadow-lg">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
             <span>Ver Mapa</span>
         </a>
+        </div>
     </div>
 
     <!-- KPI Cards -->
@@ -98,7 +102,9 @@
                     {% for r in ultimos %}
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900 truncate max-w-[200px]">{{ r.barrio|default:"Sin barrio" }}</div>
+                            <div class="font-medium text-gray-900 truncate max-w-[200px]">
+                                {% if r.barrio %}{{ r.barrio }}{% elif r.municipio %}{{ r.municipio.nombre }}{% else %}Sin ubicación{% endif %}
+                            </div>
                             <div class="text-gray-400 text-xs truncate max-w-[200px]">{{ r.descripcion|truncatechars:40 }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-600">{{ r.categoria.nombre|default:"—" }}</td>
@@ -129,13 +135,13 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Line Chart
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const gradient = lineCtx.createLinearGradient(0, 0, 0, 200);
+(function () {
+    // ── Gráfico de línea ────────────────────────────────────────────────
+    var lineCtx  = document.getElementById('lineChart').getContext('2d');
+    var gradient = lineCtx.createLinearGradient(0, 0, 0, 200);
     gradient.addColorStop(0, 'rgba(22,163,74,0.3)');
     gradient.addColorStop(1, 'rgba(22,163,74,0)');
-    new Chart(lineCtx, {
+    var lineChart = new Chart(lineCtx, {
         type: 'line',
         data: {
             labels: {{ labels_semana|safe }},
@@ -146,23 +152,73 @@ document.addEventListener('DOMContentLoaded', function () {
                 pointBorderColor: '#16A34A', pointBorderWidth: 2, fill: true, tension: 0.4
             }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: {
-            y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
-            x: { grid: { display: false } }
-        }}
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f3f4f6' } },
+                x: { grid: { display: false } }
+            }
+        }
     });
-    // Donut Chart
-    const donutCtx = document.getElementById('donutChart').getContext('2d');
-    new Chart(donutCtx, {
+
+    // ── Gráfico donut ───────────────────────────────────────────────────
+    var donutCtx  = document.getElementById('donutChart').getContext('2d');
+    var donutChart = new Chart(donutCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Pendiente', 'En Proceso', 'Resuelto', 'Rechazado'],
-            datasets: [{ data: [{{ pendientes }}, {{ en_proceso }}, {{ resueltos }}, 0],
-                backgroundColor: ['#ef4444','#f59e0b','#16a34a','#6b7280'],
-                borderWidth: 0, hoverOffset: 6 }]
+            labels: ['Pendiente', 'En proceso', 'Resuelto', 'Rechazado'],
+            datasets: [{
+                data: [{{ pendientes }}, {{ en_proceso }}, {{ resueltos }}, {{ rechazados }}],
+                backgroundColor: ['#ef4444', '#f59e0b', '#16a34a', '#6b7280'],
+                borderWidth: 0, hoverOffset: 6
+            }]
         },
-        options: { responsive: true, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } } }
+        options: {
+            responsive: true, cutout: '70%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } }
+        }
     });
-});
+
+    // ── IDs de KPI cards ────────────────────────────────────────────────
+    var kpiEls = {
+        total:     document.querySelector('.text-3xl.font-black.text-gray-900'),
+        pendientes: document.querySelector('.text-3xl.font-black.text-red-600'),
+        en_proceso: document.querySelector('.text-3xl.font-black.text-yellow-600'),
+        resueltos:  document.querySelector('.text-3xl.font-black.text-green-600'),
+    };
+
+    // ── Polling cada 60 s ───────────────────────────────────────────────
+    function syncStats() {
+        fetch('/panel/api/stats/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            // KPI cards
+            if (kpiEls.total)     kpiEls.total.textContent     = d.total;
+            if (kpiEls.pendientes) kpiEls.pendientes.textContent = d.pendientes;
+            if (kpiEls.en_proceso) kpiEls.en_proceso.textContent = d.en_proceso;
+            if (kpiEls.resueltos)  kpiEls.resueltos.textContent  = d.resueltos;
+
+            // Donut chart
+            donutChart.data.datasets[0].data = [d.pendientes, d.en_proceso, d.resueltos, d.rechazados];
+            donutChart.update('none');
+
+            // Line chart (últimos 7 días)
+            lineChart.data.labels   = d.labels_semana;
+            lineChart.data.datasets[0].data = d.reportes_semana;
+            lineChart.update('none');
+
+            // Parpadeo indicador live
+            var pulse = document.getElementById('dash-pulse');
+            if (pulse) {
+                pulse.style.opacity = '1';
+                setTimeout(function() { pulse.style.opacity = '0.4'; }, 600);
+            }
+        })
+        .catch(function() {});
+    }
+
+    setInterval(syncStats, 60000);   // cada 60 s
+})();
 </script>
 {% endblock %}

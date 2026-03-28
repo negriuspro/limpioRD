@@ -2,67 +2,171 @@
 {% block title %}Mis Reportes — LimpioRD{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="min-h-screen bg-slate-50 pb-20">
+<div class="max-w-4xl mx-auto px-4 py-8">
+
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{% url 'reportes:dashboard_ciudadano' %}"
+           class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary-600 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </a>
         <div>
-            <h1 class="text-3xl font-black text-gray-900 leading-tight">Historial de Reportes</h1>
-            <p class="text-gray-500 mt-2">Seguimiento detallado de todas tus colaboraciones.</p>
-        </div>
-        <div class="flex items-center gap-2 bg-white border border-gray-100 p-2 rounded-2xl shadow-sm">
-            <a href="?estado=" class="px-4 py-2 rounded-xl text-xs font-bold transition-all {% if not estado_sel %}bg-primary-600 text-white shadow-lg shadow-green-900/10{% else %}text-gray-400 hover:text-gray-900{% endif %}">
-                Todos
-            </a>
-            {% for val, label in estados %}
-            <a href="?estado={{ val }}" class="px-4 py-2 rounded-xl text-xs font-bold transition-all {% if val == estado_sel %}bg-primary-600 text-white shadow-lg shadow-green-900/10{% else %}text-gray-400 hover:text-gray-900{% endif %}">
-                {{ label|truncatechars:10 }}
-            </a>
-            {% endfor %}
+            <h1 class="text-2xl font-black text-slate-900">Historial de Reportes</h1>
+            <p class="text-sm text-slate-500">Todas tus colaboraciones con tu municipio</p>
         </div>
     </div>
 
-    <!-- Reports Grid -->
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for reporte in reportes %}
-        <div class="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all group">
-            <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:scale-110 transition-transform">
-                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                </div>
-                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                    {% if reporte.estado == 'pendiente' %}bg-red-50 text-red-600
-                    {% elif reporte.estado == 'resuelto' %}bg-green-50 text-green-600
-                    {% else %}bg-yellow-50 text-yellow-600{% endif %}">
-                    {{ reporte.get_estado_display }}
-                </span>
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 mb-5">
+        <!-- Search bar -->
+        <form method="GET" class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" name="q" value="{{ buscar }}" placeholder="Buscar por barrio o descripción..."
+                       class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary-400 bg-slate-50 placeholder-slate-400 transition-all">
             </div>
-            
-            <h3 class="text-xl font-black text-gray-900 mb-2 leading-tight">
-                {{ reporte.barrio|default:"Sin barrio especificado" }}
-            </h3>
-            <p class="text-sm text-gray-400 mb-6 line-clamp-3 leading-relaxed">
-                {{ reporte.descripcion }}
-            </p>
 
-            <div class="flex items-center justify-between pt-6 border-t border-gray-50">
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-gray-300 font-black uppercase tracking-widest">Municipio</span>
-                    <span class="text-xs font-bold text-gray-600">{{ reporte.municipio.nombre }}</span>
-                </div>
-                <a href="{% url 'reportes:detalle_reporte' reporte.id %}" class="w-10 h-10 bg-primary-50 text-primary-600 rounded-xl flex items-center justify-center hover:bg-primary-600 hover:text-white transition-colors">
-                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            <!-- Estado filter pills -->
+            <div class="flex flex-wrap gap-1.5 items-center">
+                <a href="?{% if buscar %}q={{ buscar }}&{% endif %}estado="
+                   class="px-3 py-2 rounded-xl text-xs font-bold transition-all {% if not estado_sel %}bg-primary-600 text-white{% else %}bg-slate-100 text-slate-500 hover:bg-slate-200{% endif %}">
+                    Todos
                 </a>
+                {% for val, label in estados %}
+                <a href="?{% if buscar %}q={{ buscar }}&{% endif %}estado={{ val }}"
+                   class="px-3 py-2 rounded-xl text-xs font-bold transition-all {% if val == estado_sel %}bg-primary-600 text-white{% else %}bg-slate-100 text-slate-500 hover:bg-slate-200{% endif %}">
+                    {{ label|truncatechars:12 }}
+                </a>
+                {% endfor %}
             </div>
-        </div>
+
+            {% if buscar %}<button type="submit" class="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold">Buscar</button>{% endif %}
+        </form>
+    </div>
+
+    <!-- Reports list -->
+    <div class="space-y-3">
+        {% for reporte in reportes %}
+        <a href="{% url 'reportes:detalle_reporte' reporte.id %}"
+           class="bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 p-4 hover:shadow-md hover:border-primary-100 transition-all group">
+
+            <!-- Thumbnail -->
+            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 flex items-center justify-center">
+                {% if reporte.foto %}
+                    <img src="{{ reporte.foto.url }}" alt="Foto" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-2xl">
+                        {% if reporte.categoria %}
+                            {% with n=reporte.categoria.nombre|lower %}
+                            {% if 'recicl' in n or 'plastic' in n %}♻️
+                            {% elif 'vidrio' in n %}🍶
+                            {% elif 'papel' in n or 'carton' in n %}📦
+                            {% elif 'peligro' in n %}⚠️
+                            {% elif 'organic' in n %}🌿
+                            {% elif 'electr' in n %}💻
+                            {% else %}🗑️
+                            {% endif %}
+                            {% endwith %}
+                        {% else %}🗑️
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h3 class="font-bold text-slate-900 text-sm truncate">
+                            {{ reporte.barrio|default:"Sin barrio especificado" }}
+                            {% if reporte.categoria %}<span class="text-slate-400 font-normal"> — {{ reporte.categoria.nombre }}</span>{% endif %}
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5 truncate">{{ reporte.descripcion|truncatechars:60 }}</p>
+                        <p class="text-[11px] text-slate-300 font-bold mt-1 uppercase tracking-wide">
+                            {{ reporte.creado_en|timesince }} · {{ reporte.municipio.nombre }}
+                        </p>
+                    </div>
+                    <span class="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
+                        {% if reporte.estado == 'pendiente' %}bg-red-50 text-red-600
+                        {% elif reporte.estado == 'resuelto' %}bg-green-50 text-green-600
+                        {% elif reporte.estado == 'en_proceso' %}bg-yellow-50 text-yellow-600
+                        {% elif reporte.estado == 'revisando' %}bg-blue-50 text-blue-700
+                        {% else %}bg-slate-100 text-slate-500{% endif %}">
+                        {{ reporte.get_estado_display }}
+                    </span>
+                </div>
+            </div>
+
+            <svg class="w-4 h-4 text-slate-300 group-hover:text-primary-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+
         {% empty %}
-        <div class="col-span-full py-24 text-center">
-            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">No tienes reportes en esta sección</h3>
-            <p class="text-gray-400 px-8">Explora otras categorías o crea un nuevo reporte para empezar.</p>
+        <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center">
+            <div class="text-5xl mb-4">🔍</div>
+            <h3 class="font-bold text-slate-800 mb-2 text-lg">
+                {% if estado_sel or buscar %}No encontramos resultados{% else %}Aún no tienes reportes{% endif %}
+            </h3>
+            <p class="text-sm text-slate-400 mb-6 max-w-xs mx-auto">
+                {% if estado_sel or buscar %}
+                    Intenta con otro filtro o término de búsqueda.
+                {% else %}
+                    Empieza reportando acumulaciones de basura en tu sector.
+                {% endif %}
+            </p>
+            {% if estado_sel or buscar %}
+                <a href="{% url 'reportes:mis_reportes' %}" class="inline-flex items-center gap-2 bg-slate-100 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">
+                    Limpiar filtros
+                </a>
+            {% else %}
+                <a href="{% url 'reportes:crear_reporte' %}" class="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-md shadow-primary-500/20 hover:bg-primary-500 transition-colors">
+                    Crear mi primer reporte
+                </a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if reportes.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 mt-8">
+        {% if reportes.has_previous %}
+        <a href="?{% if estado_sel %}estado={{ estado_sel }}&{% endif %}{% if buscar %}q={{ buscar }}&{% endif %}page={{ reportes.previous_page_number }}"
+           class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:border-primary-400 hover:text-primary-600 transition-colors shadow-sm font-bold">
+            ←
+        </a>
+        {% endif %}
+
+        {% for num in reportes.paginator.page_range %}
+            {% if reportes.number == num %}
+            <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary-600 text-white font-black text-sm">{{ num }}</span>
+            {% elif num > reportes.number|add:"-3" and num < reportes.number|add:"3" %}
+            <a href="?{% if estado_sel %}estado={{ estado_sel }}&{% endif %}{% if buscar %}q={{ buscar }}&{% endif %}page={{ num }}"
+               class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-primary-400 hover:text-primary-600 transition-colors shadow-sm text-sm font-bold">
+                {{ num }}
+            </a>
+            {% endif %}
+        {% endfor %}
+
+        {% if reportes.has_next %}
+        <a href="?{% if estado_sel %}estado={{ estado_sel }}&{% endif %}{% if buscar %}q={{ buscar }}&{% endif %}page={{ reportes.next_page_number }}"
+           class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:border-primary-400 hover:text-primary-600 transition-colors shadow-sm font-bold">
+            →
+        </a>
+        {% endif %}
+    </div>
+    <p class="text-center text-xs text-slate-400 mt-3 font-semibold">
+        Página {{ reportes.number }} de {{ reportes.paginator.num_pages }} &bull;
+        {{ reportes.paginator.count }} reporte{{ reportes.paginator.count|pluralize:"s" }} en total
+    </p>
+    {% endif %}
+
+</div>
 </div>
 {% endblock %}

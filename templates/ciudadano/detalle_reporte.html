@@ -1,104 +1,230 @@
 {% extends 'base.html' %}
-{% block title %}Reporte Mensaje — LimpioRD{% endblock %}
+{% block title %}Detalle de Reporte — LimpioRD{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
+<style>
+    #detail-map { height: 220px; width: 100%; border-radius: 1rem; }
+</style>
+<div class="min-h-screen bg-slate-50 pb-20">
+<div class="max-w-4xl mx-auto px-4 py-8">
+
     <!-- Header -->
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{% url 'reportes:mis_reportes' %}" class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary-600 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{% url 'reportes:mis_reportes' %}"
+           class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary-600 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+            </svg>
         </a>
         <div>
-            <h1 class="text-2xl font-black text-gray-900 leading-tight">Detalles del Reporte</h1>
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Ref: #{{ reporte.id|stringformat:".8s" }}</p>
+            <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">Ref: #{{ reporte.id|stringformat:".8s"|upper }}</p>
+            <h1 class="text-2xl font-black text-slate-900 leading-tight">Detalles del Reporte</h1>
         </div>
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-10">
-        <!-- Main Content -->
-        <div class="space-y-10">
-            <!-- Status Detail -->
-            <div class="bg-dark-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-32 h-32 bg-primary-600/20 rounded-full blur-3xl"></div>
+    <div class="grid lg:grid-cols-5 gap-6">
+
+        <!-- ─── LEFT ──────────────────────────────────────────── -->
+        <div class="lg:col-span-3 space-y-5">
+
+            <!-- Status card -->
+            <div class="bg-primary-900 text-white p-7 rounded-3xl shadow-xl relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-36 h-36 bg-primary-500/20 rounded-full blur-2xl pointer-events-none"></div>
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="text-xs font-black uppercase tracking-widest text-primary-400">Estado Actual</div>
-                        <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest
-                            {% if reporte.estado == 'pendiente' %}bg-red-600 text-white
-                            {% elif reporte.estado == 'resuelto' %}bg-green-600 text-white
-                            {% else %}bg-yellow-500 text-white{% endif %}">
+                    <div class="flex items-center justify-between mb-5">
+                        <p class="text-[11px] text-primary-400 font-black uppercase tracking-widest">Estado Actual</p>
+                        <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest
+                            {% if reporte.estado == 'pendiente' %}bg-red-500 text-white
+                            {% elif reporte.estado == 'resuelto' %}bg-green-500 text-white
+                            {% elif reporte.estado == 'revisando' %}bg-blue-500 text-white
+                            {% elif reporte.estado == 'en_proceso' %}bg-yellow-500 text-white
+                            {% else %}bg-slate-500 text-white{% endif %}">
                             {{ reporte.get_estado_display }}
                         </span>
                     </div>
+
                     {% if reporte.estado == 'pendiente' %}
-                    <h3 class="text-2xl font-black mb-2">Estamos revisando tu reporte</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">Personal del ayuntamiento de {{ reporte.municipio.nombre }} lo evaluará en breve.</p>
+                        <h3 class="text-xl font-black mb-2 leading-tight">Revisando tu reporte</h3>
+                        <p class="text-sm text-primary-200/70 leading-relaxed">
+                            El ayuntamiento de <strong>{{ reporte.municipio.nombre }}</strong> lo evaluará pronto.
+                        </p>
+                    {% elif reporte.estado == 'revisando' %}
+                        <h3 class="text-xl font-black mb-2 leading-tight">Reporte en revisión</h3>
+                        <p class="text-sm text-primary-200/70 leading-relaxed">El equipo municipal lo está evaluando actualmente.</p>
+                    {% elif reporte.estado == 'en_proceso' %}
+                        <h3 class="text-xl font-black mb-2 leading-tight">Equipo en camino</h3>
+                        <p class="text-sm text-primary-200/70 leading-relaxed">Se ha asignado un equipo de limpieza para atender este reporte.</p>
                     {% elif reporte.estado == 'resuelto' %}
-                    <h3 class="text-2xl font-black mb-2">¡Reporte Resuelto! 🎉</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">El problema ha sido corregido. Gracias por tu ayuda, ganaste {{ reporte.puntos_otorgados }} puntos.</p>
+                        <h3 class="text-xl font-black mb-2 leading-tight">¡Reporte Resuelto! 🎉</h3>
+                        <p class="text-sm text-primary-200/70 leading-relaxed">El problema fue corregido. Ganaste <strong class="text-primary-300">{{ reporte.puntos_otorgados }}</strong> puntos.</p>
                     {% else %}
-                    <h3 class="text-2xl font-black mb-2">Personal municipal actuando</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">Se ha asignado un equipo para resolver esta acumulación de residuos.</p>
+                        <h3 class="text-xl font-black mb-2">Reporte {{ reporte.get_estado_display }}</h3>
+                        <p class="text-sm text-primary-200/70 leading-relaxed">{{ reporte.nota_resolucion|default:"Sin notas adicionales." }}</p>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Details Table -->
-            <div class="space-y-4">
-                <h4 class="font-bold text-gray-900 px-2">Información enviada</h4>
-                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-6">
+            <!-- Photo -->
+            {% if reporte.foto %}
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest px-5 pt-5 pb-3">Fotografía del problema</p>
+                <img src="{{ reporte.foto.url }}" alt="Foto del reporte"
+                     class="w-full object-cover max-h-72">
+            </div>
+            {% endif %}
+
+            <!-- Details -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
+                <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest">Información enviada</p>
+
+                <div>
+                    <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Descripción</p>
+                    <p class="text-sm text-slate-700 leading-relaxed">{{ reporte.descripcion|default:"Sin descripción." }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
                     <div>
-                        <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Descripción</div>
-                        <p class="text-sm text-gray-600 leading-relaxed font-medium">{{ reporte.descripcion }}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Barrio</div>
-                            <p class="text-sm text-gray-600 font-bold">{{ reporte.barrio|default:"—" }}</p>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Municipio</div>
-                            <p class="text-sm text-gray-600 font-bold">{{ reporte.municipio.nombre }}</p>
-                        </div>
+                        <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Barrio</p>
+                        <p class="text-sm font-bold text-slate-700">{{ reporte.barrio|default:"—" }}</p>
                     </div>
                     <div>
-                        <div class="text-[10px] text-gray-300 font-black uppercase tracking-widest mb-1">Referencia</div>
-                        <p class="text-sm text-gray-600 font-bold italic">{{ reporte.referencia|default:"—" }}</p>
+                        <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Municipio</p>
+                        <p class="text-sm font-bold text-slate-700">{{ reporte.municipio.nombre }}</p>
                     </div>
+                    <div>
+                        <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Categoría</p>
+                        <p class="text-sm font-bold text-slate-700">{{ reporte.categoria.nombre|default:"General" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Urgencia</p>
+                        <p class="text-sm font-bold
+                            {% if reporte.urgencia >= 3 %}text-red-600
+                            {% elif reporte.urgencia == 2 %}text-yellow-600
+                            {% else %}text-green-600{% endif %}">
+                            {{ reporte.get_urgencia_display }}
+                        </p>
+                    </div>
+                </div>
+
+                {% if reporte.referencia %}
+                <div>
+                    <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-1.5">Punto de referencia</p>
+                    <p class="text-sm text-slate-600 italic">{{ reporte.referencia }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Mini map -->
+                <div>
+                    <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest mb-2">Ubicación</p>
+                    <div id="detail-map" class="border border-slate-200"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar / Timeline -->
-        <div class="space-y-8">
-            <h4 class="font-bold text-gray-900 px-2">Línea de tiempo</h4>
-            <div class="relative space-y-8 pl-8 before:content-[''] before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                {% for h in historial %}
-                <div class="relative">
-                    <div class="absolute -left-[25px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-primary-600 shadow-lg shadow-green-900/20"></div>
-                    <div class="text-xs font-black text-gray-900 mb-1">Estado: {{ h.estado_nuevo }}</div>
-                    <p class="text-xs text-gray-400 leading-relaxed">{{ h.notas|default:"Tratamiento estándar del reporte." }}</p>
-                    <div class="text-[10px] font-bold text-gray-300 uppercase mt-2">{{ h.creado_en|date:"d M, H:i" }}</div>
+        <!-- ─── RIGHT ──────────────────────────────────────────── -->
+        <div class="lg:col-span-2 space-y-5">
+
+            <!-- Points -->
+            {% if reporte.puntos_otorgados %}
+            <div class="bg-gradient-to-br from-primary-50 to-emerald-50 rounded-3xl p-6 border border-primary-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-primary-600 font-black uppercase tracking-widest mb-1">Puntos Ganados</p>
+                    <p class="text-3xl font-black text-primary-700">+{{ reporte.puntos_otorgados }}</p>
+                    <p class="text-xs text-primary-500 font-semibold mt-1">Por colaborar</p>
                 </div>
-                {% empty %}
-                <div class="relative">
-                    <div class="absolute -left-[25px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-primary-600 shadow-lg shadow-green-900/20 shadow-none"></div>
-                    <div class="text-xs font-black text-gray-900 mb-1">Reporte creado exitosamente</div>
-                    <p class="text-xs text-gray-400 leading-relaxed">Se registró correctamente y está en cola de revisión.</p>
-                    <div class="text-[10px] font-bold text-gray-300 uppercase mt-2">{{ reporte.creado_en|date:"d M, H:i" }}</div>
+                <div class="text-4xl">🌱</div>
+            </div>
+            {% endif %}
+
+            <!-- Timeline -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest mb-5">Línea de Tiempo</p>
+
+                <div class="relative space-y-6 pl-7
+                            before:content-[''] before:absolute before:left-[9px]
+                            before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-100">
+
+                    <!-- Creación (siempre) -->
+                    <div class="relative">
+                        <div class="absolute -left-7 top-1 w-4 h-4 rounded-full bg-primary-500 border-2 border-white shadow-md shadow-primary-500/30"></div>
+                        <p class="text-xs font-black text-slate-800 mb-0.5">Reporte creado</p>
+                        <p class="text-xs text-slate-400">Se registró y entró en cola de revisión.</p>
+                        <p class="text-[10px] font-bold text-slate-300 uppercase mt-1">{{ reporte.creado_en|date:"d M Y, H:i" }}</p>
+                    </div>
+
+                    {% for h in historial %}
+                    <div class="relative">
+                        <div class="absolute -left-7 top-1 w-4 h-4 rounded-full bg-primary-400 border-2 border-white shadow-sm"></div>
+                        <p class="text-xs font-black text-slate-800 mb-0.5">
+                            Estado: <span class="text-primary-600">{{ h.estado_nuevo }}</span>
+                        </p>
+                        {% if h.notas %}
+                        <p class="text-xs text-slate-500 leading-relaxed">{{ h.notas }}</p>
+                        {% endif %}
+                        {% if h.cambiado_por %}
+                        <p class="text-[10px] text-slate-300 font-semibold mt-0.5">Por: {{ h.cambiado_por.nombre }}</p>
+                        {% endif %}
+                        <p class="text-[10px] font-bold text-slate-300 uppercase mt-1">{{ h.creado_en|date:"d M Y, H:i" }}</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
 
-            <!-- Points card -->
-            <div class="bg-yellow-50 rounded-3xl p-6 border border-yellow-100 flex items-center justify-between">
-                <div>
-                    <h4 class="font-bold text-yellow-900 text-sm">Puntos ganados</h4>
-                    <p class="text-xs text-yellow-700">Por colaborar</p>
-                </div>
-                <div class="text-2xl font-black text-yellow-600">+10 🌱</div>
+            <!-- Foto resolución -->
+            {% if reporte.foto_resolucion %}
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest px-5 pt-5 pb-3">Foto de resolución</p>
+                <img src="{{ reporte.foto_resolucion.url }}" alt="Foto de resolución" class="w-full object-cover max-h-48">
+                <p class="px-5 pb-5 text-xs text-slate-400 mt-2 italic">{{ reporte.nota_resolucion }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="bg-slate-100 rounded-3xl p-5 space-y-3">
+                <a href="{% url 'reportes:mis_reportes' %}"
+                   class="block text-center bg-white text-slate-600 border border-slate-200 py-3 rounded-2xl text-sm font-bold hover:bg-slate-50 transition-colors">
+                    Ver todos mis reportes
+                </a>
+                <a href="{% url 'reportes:crear_reporte' %}"
+                   class="block text-center bg-primary-600 text-white py-3 rounded-2xl text-sm font-bold hover:bg-primary-500 transition-colors shadow-md shadow-primary-500/20">
+                    Crear nuevo reporte
+                </a>
             </div>
         </div>
     </div>
 </div>
+</div>
+
+<script>
+// Mini mapa de detalle
+(function() {
+    var lat = {{ reporte.latitud }}, lng = {{ reporte.longitud }};
+    if (!lat || !lng) return;
+
+    var map = L.map('detail-map', {
+        center: [lat, lng], zoom: 16,
+        zoomControl: false, scrollWheelZoom: false, dragging: false,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19, attributionControl: false
+    }).addTo(map);
+
+    // Icono según categoría
+    var catColor = "{{ reporte.categoria.color|default:'#10b981' }}";
+    var icon = L.divIcon({
+        className: '',
+        html: `<div style="width:28px;height:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+            <svg viewBox="0 0 28 34" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14 0C6.268 0 0 6.268 0 14c0 9.8 12.6 19.2 13.104 19.565a1.5 1.5 0 001.792 0C15.4 33.2 28 23.8 28 14 28 6.268 21.732 0 14 0z" fill="${catColor}"/>
+                <circle cx="14" cy="13" r="7" fill="white" opacity="0.9"/>
+            </svg>
+        </div>`,
+        iconSize: [28, 34], iconAnchor: [14, 34],
+    });
+
+    L.marker([lat, lng], { icon: icon }).addTo(map);
+    setTimeout(function() { map.invalidateSize(); }, 200);
+})();
+</script>
 {% endblock %}

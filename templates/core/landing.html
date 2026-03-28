@@ -1,108 +1,113 @@
 {% extends 'base.html' %}
 {% block title %}LimpioRD — Mantén tu ciudad limpia y gana premios{% endblock %}
+{% block meta_description %}Reporta acumulaciones de basura en tu municipio en segundos, gana puntos y canjéalos por recompensas en comercios aliados.{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="gradient-hero text-white min-h-[100vh] flex items-center relative overflow-hidden pt-20">
-    <!-- Grid Pattern Overlay -->
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMGg0MHY0MEgwem0zOSAzOVYxam0tMzggMHYtMzh6bTEgMGgzOHYxbS0zOC0zaDM4djF6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+Cjwvc3ZnPg==')] opacity-30"></div>
-    <!-- Background animated blobs -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] bg-primary-500/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div class="absolute bottom-[10%] right-[-10%] w-[400px] h-[400px] bg-emerald-700/30 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay:2s"></div>
-    </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 w-full">
-        <div class="grid lg:grid-cols-12 gap-16 items-center">
-            <!-- Left Column -->
-            <div class="lg:col-span-7 space-y-10 animate-fade-up">
-                <div class="inline-flex items-center space-x-3 glass rounded-full px-5 py-2.5 text-sm text-emerald-200 font-semibold shadow-lg shadow-black/10 border border-primary-500/20 backdrop-blur-xl">
-                    <span class="relative flex h-3 w-3">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-3 w-3 bg-primary-500"></span>
+
+<!-- ── HERO ──────────────────────────────────────────────────── -->
+<section class="gradient-hero text-white min-h-[100vh] flex items-center relative overflow-hidden">
+    <!-- Grid overlay -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none"
+         style="background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:40px 40px;"></div>
+
+    <!-- Blobs -->
+    <div class="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] bg-primary-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute bottom-0 right-[-10%] w-[500px] h-[500px] bg-emerald-700/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" style="animation-delay:2s"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10 w-full">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+            <!-- Left -->
+            <div class="space-y-8 animate-fade-up">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-3 glass rounded-full px-5 py-2.5 text-sm text-emerald-200 font-semibold border border-primary-500/20">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-500"></span>
                     </span>
-                    <span>Plataforma activa en República Dominicana</span>
+                    Plataforma activa en República Dominicana
                 </div>
-                <h1 class="text-5xl md:text-6xl lg:text-[5.5rem] font-black leading-[1.1] tracking-tight text-white drop-shadow-xl">
-                    Mantén tu ciudad
-                    <span class="relative whitespace-nowrap">
-                        <span class="absolute -bottom-2 -left-2 -right-2 h-1/3 bg-primary-500/30 -skew-x-12 rounded"></span>
-                        <span class="relative text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-primary-500">limpia</span>
-                    </span>
-                    <br>y gana premios
+
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight">
+                    Mantén tu ciudad<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-primary-400">limpia</span>
+                    &amp; gana premios
                 </h1>
-                <p class="text-xl text-emerald-50/80 leading-relaxed max-w-2xl font-light">
-                    Reporta acumulaciones de basura en tu sector en segundos. Gana <strong class="font-semibold text-primary-400">puntos LimpioRD</strong> y canjéalos por descuentos en tus comercios favoritos.
+
+                <p class="text-xl text-emerald-50/75 leading-relaxed max-w-xl font-light">
+                    Reporta acumulaciones de basura en tu barrio en segundos.
+                    Gana <strong class="font-semibold text-primary-300">puntos Eco</strong> y canjéalos
+                    por descuentos en tus comercios favoritos.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-5 pt-4">
-                    <a href="{% url 'accounts:signup' %}" class="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white px-8 py-4 rounded-2xl font-bold text-lg text-center transition-all duration-300 shadow-xl shadow-primary-500/30 hover:shadow-primary-500/50 hover:-translate-y-1 flex items-center justify-center gap-2 group">
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'accounts:signup' %}"
+                       class="btn-primary px-8 py-4 text-base rounded-2xl shadow-2xl shadow-primary-500/30 hover:shadow-primary-500/50 hover:-translate-y-1 group">
                         <span>Comenzar Ahora</span>
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
                     </a>
-                    <a href="#como-funciona" class="glass text-white border border-white/20 hover:border-white/40 hover:bg-white/10 px-8 py-4 rounded-2xl font-bold text-lg text-center transition-all duration-300 flex items-center justify-center">
+                    <a href="#como-funciona"
+                       class="glass border border-white/20 hover:border-white/40 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-bold text-base text-center transition-all duration-300">
                         Cómo funciona
                     </a>
                 </div>
-                
-                <!-- Stats Row -->
-                <div class="grid grid-cols-3 gap-6 pt-10 border-t border-white/10">
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
                     <div>
-                        <div class="text-4xl font-black text-white flex items-center gap-1">
-                            1.2<span class="text-primary-400">K</span><span class="text-2xl text-primary-500">+</span>
-                        </div>
-                        <div class="text-sm font-medium text-emerald-200/70 mt-1 uppercase tracking-wider">Reportes resueltos</div>
+                        <p class="text-3xl font-black text-white">1.2<span class="text-primary-400">K</span></p>
+                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Reportes resueltos</p>
                     </div>
-                    <div class="border-l border-white/10 pl-6 space-y-1">
-                        <div class="text-4xl font-black text-white flex items-center gap-1">
-                            98<span class="text-2xl text-primary-500">+</span>
-                        </div>
-                        <div class="text-sm font-medium text-emerald-200/70 mt-1 uppercase tracking-wider">Comercios aliados</div>
+                    <div class="border-l border-white/10 pl-6">
+                        <p class="text-3xl font-black text-white">98<span class="text-primary-400">+</span></p>
+                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Comercios aliados</p>
                     </div>
-                    <div class="border-l border-white/10 pl-6 space-y-1">
-                        <div class="text-4xl font-black text-white">
-                            4.2<span class="text-primary-400">h</span>
-                        </div>
-                        <div class="text-sm font-medium text-emerald-200/70 mt-1 uppercase tracking-wider">Tiempo de resp.</div>
+                    <div class="border-l border-white/10 pl-6">
+                        <p class="text-3xl font-black text-white">4.2<span class="text-primary-400">h</span></p>
+                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Tiempo resp.</p>
                     </div>
                 </div>
             </div>
-            
-            <!-- Right Column — Feature Cards -->
-            <div class="lg:col-span-5 relative h-full min-h-[500px] hidden md:block">
-                <!-- Floating Card 1 -->
-                <div class="absolute top-10 right-0 w-full max-w-sm glass rounded-3xl p-6 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-500 animate-float" style="animation-duration: 4s;">
-                    <div class="flex items-start space-x-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-primary-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                           <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+
+            <!-- Right: floating cards -->
+            <div class="hidden lg:block relative h-[520px]">
+                <!-- Card 1 -->
+                <div class="absolute top-0 right-0 w-72 glass rounded-3xl p-6 shadow-2xl border border-white/10 animate-float" style="animation-duration:4s;">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-primary-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white text-lg">Geolocalización exacta</h3>
-                            <p class="text-emerald-50/70 text-sm mt-2 leading-relaxed">Reporta con un toque. Tu ubicación se captura y aparece instantáneamente en el mapa municipal para rápida acción.</p>
+                            <p class="font-bold text-white text-base">Geolocalización exacta</p>
+                            <p class="text-emerald-50/60 text-sm mt-1 leading-relaxed">Tu ubicación se captura y aparece en el mapa municipal al instante.</p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Floating Card 2 -->
-                <div class="absolute top-[45%] -left-8 w-full max-w-sm glass rounded-3xl p-6 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-500 animate-float" style="animation-delay: 1.5s; animation-duration: 5s;">
-                    <div class="flex items-start space-x-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+
+                <!-- Card 2 -->
+                <div class="absolute top-[42%] -left-4 w-72 glass rounded-3xl p-6 shadow-2xl border border-white/10 animate-float" style="animation-delay:1.5s;animation-duration:5s;">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white text-lg">Puntos y recompensas</h3>
-                            <p class="text-emerald-50/70 text-sm mt-2 leading-relaxed">Cada reporte válido solucionado suma puntos a tu cuenta. Visita nuestros aliados y cambia tus puntos por premios.</p>
+                            <p class="font-bold text-white text-base">Puntos y recompensas</p>
+                            <p class="text-emerald-50/60 text-sm mt-1 leading-relaxed">Cada reporte suma puntos Eco canjeables en comercios aliados.</p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Floating Card 3 -->
-                <div class="absolute bottom-[-5%] right-8 w-full max-w-sm glass rounded-3xl p-6 shadow-2xl border border-white/10 hover:border-white/20 transition-all duration-500 animate-float" style="animation-delay: 0.7s; animation-duration: 4.5s;">
-                    <div class="flex items-start space-x-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+
+                <!-- Card 3 -->
+                <div class="absolute bottom-0 right-4 w-72 glass rounded-3xl p-6 shadow-2xl border border-white/10 animate-float" style="animation-delay:0.8s;animation-duration:4.5s;">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white text-lg">Analytics Municipal</h3>
-                            <p class="text-emerald-50/70 text-sm mt-2 leading-relaxed">Panel en tiempo real para ayuntamientos. Mapas de calor y métricas completas e informes exportables para la gestión.</p>
+                            <p class="font-bold text-white text-base">Analytics Municipal</p>
+                            <p class="text-emerald-50/60 text-sm mt-1 leading-relaxed">Paneles en tiempo real con mapas de calor para ayuntamientos.</p>
                         </div>
                     </div>
                 </div>
@@ -111,64 +116,155 @@
     </div>
 </section>
 
-<!-- Cómo Funciona -->
-<section id="como-funciona" class="py-32 bg-gray-50 relative">
+<!-- ── CÓMO FUNCIONA ──────────────────────────────────────────── -->
+<section id="como-funciona" class="py-28 bg-white relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-3xl mx-auto mb-20 animate-fade-up">
-            <span class="text-primary-600 font-bold text-sm uppercase tracking-[0.2em] bg-primary-50 px-4 py-2 rounded-full border border-primary-100">Simple y rápido</span>
-            <h2 class="text-4xl md:text-5xl font-black text-gray-900 mt-6 tracking-tight">Cómo funciona LimpioRD</h2>
-            <p class="text-xl text-gray-500 mt-4 font-medium">Desde que reportas el problema hasta que ganas tu recompensa, hemos optimizado cada paso.</p>
+        <div class="text-center max-w-2xl mx-auto mb-20">
+            <span class="text-primary-600 font-black text-xs uppercase tracking-[0.2em] bg-primary-50 px-4 py-2 rounded-full border border-primary-100 inline-block">Simple y rápido</span>
+            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mt-6 mb-4 tracking-tight">Cómo funciona LimpioRD</h2>
+            <p class="text-slate-500 text-lg font-medium">Desde que reportas hasta que ganas tu recompensa, en 3 pasos.</p>
         </div>
-        
-        <div class="grid lg:grid-cols-3 gap-10">
-            {% for step in steps %}
-            <!-- This assumes steps are passed. If not falling back to the default below -->
-            <div class="bg-white rounded-[2rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 relative group hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500">
-                <div class="absolute -top-6 left-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-lg flex items-center justify-center text-2xl font-black group-hover:scale-110 transition-transform duration-300">{{ forloop.counter }}</div>
-                <h3 class="text-2xl font-bold text-gray-900 mt-6 mb-4">{{ step.titulo }}</h3>
-                <p class="text-gray-500 font-medium leading-relaxed">{{ step.descripcion }}</p>
+
+        <div class="grid md:grid-cols-3 gap-8 relative">
+            <!-- Connector line -->
+            <div class="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-primary-200 via-primary-400 to-primary-200 z-0"></div>
+
+            <!-- Step 1 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 relative group hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500 z-10">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-primary-500/30 mb-6 group-hover:scale-110 transition-transform">
+                    1
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-3">Reporta con foto</h3>
+                <p class="text-slate-500 leading-relaxed">Toma una foto del problema, marca la ubicación en el mapa — tu barrio y municipio se detectan automáticamente.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 relative group hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500 z-10" style="transition-delay:80ms">
+                <div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-slate-500/20 mb-6 group-hover:scale-110 transition-transform">
+                    2
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-3">El ayuntamiento actúa</h3>
+                <p class="text-slate-500 leading-relaxed">El equipo municipal recibe una alerta en su mapa de gestión y asigna un equipo de limpieza directamente.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 relative group hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500 z-10" style="transition-delay:160ms">
+                <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-amber-500/30 mb-6 group-hover:scale-110 transition-transform">
+                    3
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-3">Gana y canjea</h3>
+                <p class="text-slate-500 leading-relaxed">Cuando el caso es resuelto, los puntos se acreditan. Úsalos en nuestra red de comercios para obtener descuentos increíbles.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── IMPACTO / STATS ────────────────────────────────────────── -->
+<section class="py-20 bg-primary-900 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 25% 50%, #10b981 0%, transparent 50%), radial-gradient(circle at 75% 50%, #059669 0%, transparent 50%);"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <p class="text-5xl font-black text-white mb-2">1.2<span class="text-primary-400">K</span></p>
+                <p class="text-primary-300 text-sm font-bold uppercase tracking-wider">Reportes resueltos</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-white mb-2">98<span class="text-primary-400">%</span></p>
+                <p class="text-primary-300 text-sm font-bold uppercase tracking-wider">Tasa de resolución</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-white mb-2">3<span class="text-primary-400">K</span></p>
+                <p class="text-primary-300 text-sm font-bold uppercase tracking-wider">Ciudadanos activos</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-white mb-2">4.2<span class="text-primary-400">h</span></p>
+                <p class="text-primary-300 text-sm font-bold uppercase tracking-wider">Tiempo de respuesta</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CARACTERÍSTICAS ────────────────────────────────────────── -->
+<section class="py-28 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <span class="text-primary-600 font-black text-xs uppercase tracking-[0.2em] bg-primary-50 px-4 py-2 rounded-full border border-primary-100 inline-block">Tecnología verde</span>
+            <h2 class="text-4xl font-black text-slate-900 mt-6 tracking-tight">Una plataforma completa</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for feature in features %}
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform {{ feature.bg }}">
+                    {{ feature.emoji }}
+                </div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">{{ feature.titulo }}</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">{{ feature.descripcion }}</p>
             </div>
             {% empty %}
-            <!-- Default Step 1 -->
-            <div class="bg-white rounded-[2rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 relative group hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500">
-                <div class="absolute -top-6 left-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-lg shadow-primary-500/30 flex items-center justify-center text-2xl font-black group-hover:scale-110 transition-transform duration-300">1</div>
-                <h3 class="text-2xl font-bold text-gray-900 mt-6 mb-4">Abre y Reporta</h3>
-                <p class="text-gray-500 font-medium leading-relaxed text-lg">Toma una foto del problema desde nuestra web-app y descríbelo. Tu ubicación se adjuntará automáticamente para mayor precisión.</p>
+            <!-- Default features -->
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">📸</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">Reporte con foto</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Adjunta imágenes de evidencia para acelerar la validación y aumentar tus puntos ganados.</p>
             </div>
-            <!-- Default Step 2 -->
-            <div class="bg-white rounded-[2rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 relative group hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500" style="transition-delay: 100ms;">
-                <div class="absolute -top-6 left-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 text-white shadow-lg shadow-black/20 flex items-center justify-center text-2xl font-black group-hover:scale-110 transition-transform duration-300">2</div>
-                <h3 class="text-2xl font-bold text-gray-900 mt-6 mb-4">El ayuntamiento actúa</h3>
-                <p class="text-gray-500 font-medium leading-relaxed text-lg">El equipo de limpieza municipal recibe una alerta inmediata en su mapa de gestión y envían un camión directamente al lugar reportado.</p>
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">📍</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">GPS automático</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Tu municipio y barrio se detectan automáticamente con geolocalización en tiempo real.</p>
             </div>
-            <!-- Default Step 3 -->
-            <div class="bg-white rounded-[2rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 relative group hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-2 transition-all duration-500" style="transition-delay: 200ms;">
-                <div class="absolute -top-6 left-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 text-white shadow-lg shadow-accent-500/30 flex items-center justify-center text-2xl font-black group-hover:scale-110 transition-transform duration-300">3</div>
-                <h3 class="text-2xl font-bold text-gray-900 mt-6 mb-4">Gana y Canjea</h3>
-                <p class="text-gray-500 font-medium leading-relaxed text-lg">Cuando el caso sea marcado como resuelto, los puntos serán aprobados. Usa nuestra red de comercios aliados para recibir descuentos increíbles.</p>
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">🏆</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">Sistema de puntos</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Cada reporte válido suma puntos Eco. Acumula y canjea por descuentos en comercios aliados.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">🗺️</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">Mapa de calor</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Los ayuntamientos visualizan en tiempo real dónde están los problemas con iconos por tipo de residuo.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">🔔</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">Notificaciones</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Recibe actualizaciones sobre el estado de tus reportes directamente en la plataforma.</p>
+            </div>
+            <div class="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-lg hover:border-primary-100 transition-all group">
+                <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mb-5 text-2xl group-hover:scale-110 transition-transform">📊</div>
+                <h3 class="font-black text-slate-900 text-lg mb-2">Analytics municipal</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Paneles con métricas completas, informes exportables y seguimiento del tiempo de respuesta.</p>
             </div>
             {% endfor %}
         </div>
     </div>
 </section>
 
-<!-- Call to Action Banner -->
-<section class="py-20 bg-white">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="glass rounded-[3rem] p-12 lg:p-16 text-center relative overflow-hidden bg-gradient-to-br from-dark-900 to-primary-900 shadow-2xl">
+<!-- ── CTA FINAL ──────────────────────────────────────────────── -->
+<section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-br from-primary-900 to-primary-700 rounded-[3rem] p-12 lg:p-16 text-center relative overflow-hidden shadow-2xl shadow-primary-900/30">
             <!-- Decorative circles -->
-            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full border-[30px] border-white/5"></div>
-            <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 rounded-full border-[20px] border-white/5"></div>
-            
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full border-[40px] border-white/5 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full border-[30px] border-white/5 pointer-events-none"></div>
+
             <div class="relative z-10">
-                <h2 class="text-3xl md:text-5xl font-black text-white mb-6">¿Listo para mejorar tu entorno?</h2>
-                <p class="text-xl text-emerald-100 font-light mb-10 max-w-2xl mx-auto">Únete a cientos de ciudadanos que ya están marcando la diferencia en sus municipios y ganando por ello.</p>
-                <a href="{% url 'accounts:signup' %}" class="inline-flex items-center space-x-2 bg-white text-dark-900 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-emerald-50 hover:scale-105 transition-all duration-300 shadow-xl">
+                <p class="text-primary-300 font-black text-xs uppercase tracking-widest mb-4">Hero de la Semana</p>
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
+                    ¿Listo para mejorar<br>tu comunidad?
+                </h2>
+                <p class="text-primary-100/70 text-lg font-light mb-10 max-w-xl mx-auto">
+                    Únete a miles de ciudadanos que ya están marcando la diferencia en sus municipios y ganando por ello.
+                </p>
+                <a href="{% url 'accounts:signup' %}"
+                   class="inline-flex items-center gap-3 bg-white text-primary-800 px-8 py-4 rounded-2xl font-black text-base hover:bg-emerald-50 hover:scale-105 transition-all duration-300 shadow-xl shadow-black/20">
                     <span>Crear mi cuenta gratis</span>
-                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
                 </a>
+                <p class="text-primary-400 text-xs mt-4 font-semibold">Gratis para siempre · Sin tarjeta de crédito</p>
             </div>
         </div>
     </div>
 </section>
+
 {% endblock %}

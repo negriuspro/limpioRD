@@ -2,110 +2,200 @@
 {% block title %}Mi Panel — LimpioRD{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-black text-gray-900">¡Hola, {{ user.nombre }}! 👋</h1>
-            <p class="text-gray-500 mt-1">Gracias por ayudar a mantener nuestras calles limpias.</p>
+<div class="min-h-screen bg-slate-50">
+<div class="max-w-4xl mx-auto px-4 py-8 pb-20">
+
+    <!-- ── HEADER / PERFIL ────────────────────────────────────── -->
+    <div class="text-center mb-8">
+        <!-- Avatar -->
+        <div class="relative inline-block mb-4">
+            <div class="w-24 h-24 bg-gradient-to-br from-primary-400 to-primary-700 rounded-full flex items-center justify-center text-white text-4xl font-black shadow-xl shadow-primary-500/30 mx-auto border-4 border-white">
+                {{ user.nombre|first|upper }}
+            </div>
+            <a href="#" class="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center shadow-md hover:bg-primary-500 transition-colors">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </a>
         </div>
-        <a href="{% url 'reportes:crear_reporte' %}" class="inline-flex items-center justify-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-green-900/20 transition-all hover:-translate-y-1">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-            <span>Nuevo Reporte</span>
+        <h1 class="text-2xl font-black text-slate-900">{{ user.nombre }} {{ user.apellido }}</h1>
+        <p class="text-primary-600 font-black text-xs uppercase tracking-widest mt-1">
+            {{ perfil.nivel.nombre|default:"Ciudadano Verde" }}
+        </p>
+    </div>
+
+    <!-- ── STATS GRID ─────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 gap-4 mb-5">
+        <!-- Reportes -->
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-center">
+            <div class="text-4xl font-black text-slate-800 mb-1">{{ stats.total }}</div>
+            <div class="text-xs text-slate-400 font-bold uppercase tracking-widest">Reportes</div>
+        </div>
+        <!-- Puntos -->
+        <div class="bg-primary-600 rounded-3xl p-5 text-center shadow-lg shadow-primary-500/25 relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+            <div class="text-4xl font-black text-white mb-1 relative z-10">{{ stats.puntos|default:"0" }}</div>
+            <div class="text-xs text-primary-100 font-bold uppercase tracking-widest relative z-10">Puntos Eco</div>
+        </div>
+    </div>
+
+    <!-- ── IMPACTO AMBIENTAL ───────────────────────────────────── -->
+    <div class="bg-primary-50 rounded-3xl p-5 border border-primary-100 mb-5 flex items-center justify-between">
+        <div>
+            <p class="text-[10px] text-primary-500 font-black uppercase tracking-widest mb-1">Impacto Total</p>
+            <p class="text-xl font-black text-primary-900">
+                {{ stats.resueltos }}
+                <span class="text-primary-600">reporte{{ stats.resueltos|pluralize:"s" }} resuelto{{ stats.resueltos|pluralize:"s" }}</span>
+            </p>
+        </div>
+        <div class="text-4xl opacity-60">♻️</div>
+    </div>
+
+    <!-- ── NIVEL / PROGRESO ────────────────────────────────────── -->
+    {% with puntos=stats.puntos %}
+    {% with siguiente=500 %}
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm mb-5">
+        <div class="flex items-center justify-between mb-3">
+            <div class="text-sm font-black text-slate-800">
+                Próximo Nivel: <span class="text-primary-600">Héroe Verde</span>
+            </div>
+            <div class="text-sm font-black text-primary-600">
+                {% if puntos >= siguiente %}100{% else %}{{ puntos|floatformat:0 }}{% endif %}%
+            </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div class="h-3 rounded-full bg-gradient-to-r from-primary-500 to-primary-400 transition-all duration-1000"
+                 style="width: {% if puntos >= siguiente %}100{% else %}{% widthratio puntos siguiente 100 %}{% endif %}%">
+            </div>
+        </div>
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400 font-semibold">
+            <span>{{ puntos }} puntos</span>
+            <span>Meta: {{ siguiente }}</span>
+        </div>
+    </div>
+    {% endwith %}
+    {% endwith %}
+
+    <!-- ── CTA NUEVO REPORTE ───────────────────────────────────── -->
+    <a href="{% url 'reportes:crear_reporte' %}"
+       class="block w-full bg-primary-600 hover:bg-primary-500 text-white text-center font-black py-5 rounded-2xl shadow-xl shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] mb-6 flex items-center justify-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Reportar Nuevo Residuo
+    </a>
+
+    <!-- ── ESTADÍSTICAS RÁPIDAS ───────────────────────────────── -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-center">
+            <div class="text-2xl font-black text-green-600 mb-0.5">{{ stats.resueltos }}</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Resueltos</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-center">
+            <div class="text-2xl font-black text-yellow-500 mb-0.5">{{ stats.en_proceso|default:0 }}</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">En curso</div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm text-center">
+            <div class="text-2xl font-black text-red-500 mb-0.5">{{ stats.pendientes }}</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pendientes</div>
+        </div>
+    </div>
+
+    <!-- ── HISTORIAL DE REPORTES ──────────────────────────────── -->
+    <div class="mb-3 flex items-center justify-between px-1">
+        <h2 class="font-black text-slate-800 text-lg">Historial de Reportes</h2>
+        <a href="{% url 'reportes:mis_reportes' %}"
+           class="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors">
+            Ver todos →
         </a>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Mis Puntos</div>
-            <div class="text-3xl font-black text-primary-600">{{ stats.puntos }}</div>
-            <a href="{% url 'reportes:mis_puntos' %}" class="text-xs text-primary-500 font-semibold hover:underline mt-2 inline-block">Ver recompensas →</a>
-        </div>
-        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Reportes Totales</div>
-            <div class="text-3xl font-black text-gray-900">{{ stats.total }}</div>
-        </div>
-        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Resueltos</div>
-            <div class="text-3xl font-black text-green-600">{{ stats.resueltos }}</div>
-        </div>
-        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <div class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">En revisión</div>
-            <div class="text-3xl font-black text-yellow-500">{{ stats.pendientes }}</div>
-        </div>
-    </div>
-
-    <div class="grid lg:grid-cols-3 gap-8">
-        <!-- Recent Reports List -->
-        <div class="lg:col-span-2 space-y-4">
-            <div class="flex items-center justify-between px-2">
-                <h3 class="font-bold text-gray-900">Mis reportes recientes</h3>
-                <a href="{% url 'reportes:mis_reportes' %}" class="text-sm font-semibold text-primary-600 hover:text-primary-700">Ver todos</a>
+    <div class="space-y-3">
+        {% for reporte in mis_reportes %}
+        <a href="{% url 'reportes:detalle_reporte' reporte.id %}"
+           class="bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 p-4 hover:shadow-md hover:border-primary-100 transition-all group">
+            <!-- Foto o icono categoría -->
+            <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 flex items-center justify-center">
+                {% if reporte.foto %}
+                    <img src="{{ reporte.foto.url }}" alt="Foto reporte"
+                         class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-2xl">
+                        {% if reporte.categoria %}
+                            {% with n=reporte.categoria.nombre|lower %}
+                            {% if 'recicl' in n or 'plastic' in n %}♻️
+                            {% elif 'vidrio' in n %}🍶
+                            {% elif 'papel' in n or 'carton' in n %}📦
+                            {% elif 'peligro' in n %}⚠️
+                            {% elif 'organic' in n %}🌿
+                            {% elif 'electr' in n %}💻
+                            {% else %}🗑️
+                            {% endif %}
+                            {% endwith %}
+                        {% else %}🗑️
+                        {% endif %}
+                    </span>
+                {% endif %}
             </div>
-            
-            {% for reporte in mis_reportes %}
-            <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
-                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </div>
-                    <div>
-                        <div class="font-bold text-gray-900">{{ reporte.barrio|default:"Sin barrio" }}</div>
-                        <div class="text-xs text-gray-400">{{ reporte.creado_en|date:"d M, Y" }} · {{ reporte.categoria.nombre }}</div>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end">
-                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                    <h3 class="font-bold text-slate-900 text-sm leading-tight truncate">
+                        {{ reporte.barrio|default:"Sin barrio" }}
+                        {% if reporte.categoria %} — {{ reporte.categoria.nombre }}{% endif %}
+                    </h3>
+                    <span class="flex-shrink-0 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
                         {% if reporte.estado == 'pendiente' %}bg-red-50 text-red-600
                         {% elif reporte.estado == 'resuelto' %}bg-green-50 text-green-600
-                        {% else %}bg-yellow-50 text-yellow-600{% endif %}">
+                        {% elif reporte.estado == 'en_proceso' %}bg-yellow-50 text-yellow-600
+                        {% elif reporte.estado == 'revisando' %}bg-blue-50 text-blue-700
+                        {% else %}bg-slate-100 text-slate-500{% endif %}">
                         {{ reporte.get_estado_display }}
                     </span>
-                    <a href="{% url 'reportes:detalle_reporte' reporte.id %}" class="text-xs text-gray-400 hover:text-primary-600 font-bold mt-2">Detalles →</a>
                 </div>
+                <p class="text-xs text-slate-400 font-medium truncate">{{ reporte.descripcion|truncatechars:55 }}</p>
+                <p class="text-[11px] text-slate-300 font-bold mt-1 uppercase tracking-wider">
+                    {{ reporte.creado_en|timesince }} · {{ reporte.municipio.nombre }}
+                </p>
             </div>
-            {% empty %}
-            <div class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl p-10 text-center">
-                <div class="text-gray-400 mb-2 font-medium">Aún no has enviado reportes</div>
-                <p class="text-gray-400 text-xs mb-6">Tu ciudad necesita de tu ayuda. Empieza reportando acumulaciones de basura.</p>
-                <a href="{% url 'reportes:crear_reporte' %}" class="bg-white border border-gray-200 text-gray-600 px-6 py-2 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">Crear mi primer reporte</a>
-            </div>
-            {% endfor %}
+
+            <svg class="w-4 h-4 text-slate-300 group-hover:text-primary-500 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+
+        {% empty %}
+        <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+            <div class="text-5xl mb-4">🌱</div>
+            <h3 class="font-bold text-slate-800 mb-2">¡Sé el primero en reportar!</h3>
+            <p class="text-sm text-slate-400 mb-6 max-w-xs mx-auto">Tu ciudad necesita de tu ayuda. Empieza reportando acumulaciones de basura.</p>
+            <a href="{% url 'reportes:crear_reporte' %}"
+               class="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-md shadow-primary-500/20 hover:bg-primary-500 transition-colors">
+                Crear mi primer reporte
+            </a>
         </div>
+        {% endfor %}
+    </div>
 
-        <!-- Sidebar / Ranking/Nivel -->
-        <div class="space-y-6">
-            <div class="bg-dark-900 text-white rounded-3xl p-6 shadow-xl relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-600/20 rounded-full blur-2xl"></div>
-                <div class="relative z-10">
-                    <div class="text-primary-400 text-xs font-black uppercase tracking-widest mb-4">Mi Nivel LimpioRD</div>
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center text-3xl">🌱</div>
-                        <div>
-                            <div class="text-xl font-black">{{ perfil.nivel.nombre|default:"Ciudadano Verde" }}</div>
-                            <div class="text-xs text-gray-400">Nivel 1 — Explorador</div>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-xs font-bold">
-                            <span class="text-gray-400">Progreso al siguiente nivel</span>
-                            <span class="text-primary-400">{{ stats.puntos }}/500 XP</span>
-                        </div>
-                        <div class="w-full bg-gray-800 rounded-full h-2">
-                            <div class="bg-primary-500 h-2 rounded-full" style="width: 15%"></div>
-                        </div>
-                    </div>
-                </div>
+    <!-- ── BANNER PUNTOS ──────────────────────────────────────── -->
+    {% if stats.puntos > 0 %}
+    <div class="mt-6 bg-gradient-to-r from-primary-600 to-primary-700 rounded-3xl p-6 shadow-xl shadow-primary-500/20 relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
+        <div class="relative z-10 flex items-center justify-between">
+            <div>
+                <p class="text-primary-200 text-xs font-bold uppercase tracking-widest mb-1">1.2k ciudadanos activos</p>
+                <p class="text-white font-black text-lg leading-tight">¡Canjea tus puntos<br>por recompensas!</p>
             </div>
-
-            <!-- Rewards Hook -->
-            <div class="bg-green-50 rounded-3xl p-6 border border-green-100">
-                <h4 class="font-bold text-green-900 mb-2">¡Canjea tus puntos!</h4>
-                <p class="text-sm text-green-700 mb-4 leading-relaxed">Tienes puntos disponibles para obtener descuentos en Supermercados Nacional y más.</p>
-                <a href="{% url 'reportes:mis_puntos' %}" class="block text-center bg-green-600 text-white py-3 rounded-2xl font-bold text-sm hover:bg-green-700 transition-colors">Explorar Recompensas</a>
-            </div>
+            <a href="{% url 'reportes:mis_puntos' %}"
+               class="flex-shrink-0 bg-white text-primary-700 px-5 py-3 rounded-xl font-black text-sm shadow-md hover:bg-primary-50 transition-colors">
+                Ver premios
+            </a>
         </div>
     </div>
+    {% endif %}
+
+</div>
 </div>
 {% endblock %}

@@ -1,222 +1,633 @@
 {% extends 'base.html' %}
 {% block title %}Nuevo Reporte — LimpioRD{% endblock %}
 
-{% block extra_head %}
-<style>
-  #mini-map { 
-    height: 400px; 
-    width: 100%;
-    border-radius: 1.5rem; 
-    margin-top: 1rem; 
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="min-h-screen bg-slate-100/50 pb-20"> <!-- Added background color for contrast -->
-<div class="max-w-4xl mx-auto px-4 py-12">
+<style>
+    #mini-map { height: 340px; width: 100%; border-radius: 1.25rem; }
+    .photo-zone { border: 2px dashed #cbd5e1 !important; background: #f8fafc !important; transition: all 0.3s ease; cursor: pointer; }
+    .photo-zone:hover, .photo-zone.dragover { border-color: #10b981 !important; background: #ecfdf5 !important; }
+    .cat-card input[type="radio"]:checked + .cat-inner { border-color: #10b981; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+    .cat-inner { transition: all 0.2s; }
+    #locate-btn { position: absolute; bottom: 12px; right: 12px; z-index: 500; width: 40px; height: 40px; background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    #locate-btn:hover { background: #10b981; color: white; }
+    #locate-btn svg { transition: inherit; }
+    #locate-btn:hover svg { stroke: white; }
+</style>
+<div class="min-h-screen bg-slate-50 pb-20">
+<div class="max-w-5xl mx-auto px-4 py-10 pt-6">
+
     <!-- Header -->
-    <div class="flex items-center justify-between mb-10 pb-6 border-b border-slate-200">
-        <div>
-            <h1 class="text-4xl font-black text-slate-900 leading-tight tracking-tight">Reportar Incidencia</h1>
-            <p class="text-sm text-slate-500 font-medium mt-1">Usa el mapa para marcar el punto exacto del problema.</p>
-        </div>
-        <a href="{% url 'reportes:dashboard_ciudadano' %}" class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm">
-            Cancelar y volver
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'reportes:dashboard_ciudadano' %}"
+           class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary-600 hover:border-primary-200 transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+            </svg>
         </a>
+        <div>
+            <p class="text-xs text-primary-600 font-black uppercase tracking-widest">Nuevo Reporte</p>
+            <h1 class="text-3xl font-black text-slate-900 leading-tight">
+                Informar<span class="text-primary-600 italic"> Incidencia</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-0.5">Tu reporte ayuda a mantener tu comunidad limpia y sostenible.</p>
+        </div>
     </div>
 
-    <form method="POST" class="grid lg:grid-cols-5 gap-10">
+    <form method="POST" enctype="multipart/form-data" id="reporte-form"
+          class="grid lg:grid-cols-5 gap-8">
         {% csrf_token %}
+
+        <!-- ─── LEFT COLUMN ────────────────────────────────────── -->
         <div class="lg:col-span-3 space-y-6">
-            <!-- Municipio Selection -->
-            <div>
-                <label class="block text-sm font-black text-slate-700 mb-2">Municipio</label>
-                <div class="relative">
-                    <select name="municipio" id="municipio-select" required 
-                            class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 appearance-none transition-all">
-                        <option value="">Selecciona tu municipio...</option>
-                        {% for mun in municipios %}
-                        <option value="{{ mun.id }}" data-nombre="{{ mun.nombre }}">{{ mun.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                    <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+
+            <!-- 1. CAPTURA DE EVIDENCIA -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-4">Captura de Evidencia</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Upload zone -->
+                    <label id="photo-label" class="photo-zone rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px] relative">
+                        <input type="file" name="foto" id="foto-input" accept="image/*" capture="environment" class="hidden">
+                        <div id="photo-placeholder" class="flex flex-col items-center gap-2">
+                            <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500">Cámara / Galería</span>
+                            <span class="text-[10px] text-slate-400">JPG, PNG hasta 10MB</span>
+                        </div>
+                        <!-- Preview -->
+                        <img id="photo-preview" src="" alt="Preview"
+                             class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl">
+                        <!-- Remove btn -->
+                        <button type="button" id="remove-photo"
+                                class="hidden absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-md z-10">
+                            ✕
+                        </button>
+                    </label>
+
+                    <!-- Tip card -->
+                    <div class="bg-primary-50 rounded-2xl p-5 flex flex-col justify-center border border-primary-100">
+                        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs font-bold text-primary-900 leading-relaxed">
+                            Una foto real aumenta la velocidad de resolución y tus puntos ganados.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Categoria Selection -->
-            <div x-data="{ selectedCat: '' }">
-                <label class="block text-sm font-black text-slate-700 mb-4 flex items-center gap-2">
-                    Tipo de Residuo
-                    <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full text-slate-500">Requerido</span>
-                </label>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <!-- 2. CATEGORÍA -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-4">
+                    Categoría de Residuo
+                    <span class="text-red-400 ml-1">*</span>
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" x-data="{ sel: '' }">
                     {% for cat in categorias %}
-                    <label 
-                        :class="selectedCat == '{{ cat.id }}' ? 'border-primary-500 bg-primary-50 ring-4 ring-primary-500/10' : 'border-slate-200 bg-white hover:border-slate-300'" 
-                        class="relative border-2 rounded-3xl p-5 cursor-pointer transition-all flex flex-col items-center justify-center text-center group"
-                    >
-                        <input type="radio" name="categoria" value="{{ cat.id }}" x-model="selectedCat" class="hidden" required>
-                        
-                        <div 
-                            :class="selectedCat == '{{ cat.id }}' ? 'bg-primary-500 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'" 
-                            class="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-colors"
-                        >
-                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </div>
-                        <span class="text-[12px] font-extrabold uppercase tracking-tight" :class="selectedCat == '{{ cat.id }}' ? 'text-primary-700' : 'text-slate-600'">{{ cat.nombre }}</span>
-                        
-                        <!-- Checkmark -->
-                        <template x-if="selectedCat == '{{ cat.id }}'">
-                            <div class="absolute top-2 right-2 text-primary-500 animate-fade-up">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <label class="cat-card cursor-pointer">
+                        <input type="radio" name="categoria" value="{{ cat.id }}"
+                               x-model="sel" @change="updateMapIcon($event)"
+                               data-color="{{ cat.color }}" data-nombre="{{ cat.nombre }}"
+                               class="sr-only" required>
+                        <div class="cat-inner border-2 border-slate-200 rounded-2xl p-4 flex flex-col items-center text-center gap-2 hover:border-slate-300"
+                             :class="sel == '{{ cat.id }}' ? 'border-primary-500 bg-primary-50 shadow-sm shadow-primary-100' : ''">
+                            <!-- Dynamic icon based on category name -->
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white text-lg font-bold"
+                                 style="background-color: {{ cat.color }}">
+                                {% if 'stic' in cat.nombre|lower or 'tico' in cat.nombre|lower %}♻️
+                                {% elif 'org' in cat.nombre|lower %}🌿
+                                {% elif 'escombro' in cat.nombre|lower %}🧱
+                                {% elif 'electr' in cat.nombre|lower %}💻
+                                {% elif 'vidrio' in cat.nombre|lower %}🍶
+                                {% elif 'papel' in cat.nombre|lower or 'cart' in cat.nombre|lower %}📦
+                                {% elif 'peligro' in cat.nombre|lower %}⚠️
+                                {% else %}🗑️
+                                {% endif %}
                             </div>
-                        </template>
+                            <span class="text-xs font-bold text-slate-700 leading-tight">{{ cat.nombre }}</span>
+                            <!-- Checkmark -->
+                            <div x-show="sel == '{{ cat.id }}'" class="absolute -top-1 -right-1 w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center" style="display:none;">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
                     </label>
+                    {% empty %}
+                    <p class="col-span-3 text-sm text-slate-400 text-center py-4">No hay categorías disponibles.</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Description -->
-            <div>
-                <label class="block text-sm font-black text-slate-700 mb-2">Descripción Detallada</label>
-                <textarea name="description" rows="5" required 
-                          placeholder="Ej: Gran volumen de botellas y cartones en la acera lateral del edificio azul."
-                          class="w-full bg-slate-50 border-2 border-slate-200 rounded-3xl px-6 py-5 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all"></textarea>
-            </div>
-
-            <!-- Barrio Context -->
-            <div class="grid grid-cols-2 gap-5">
-                <div>
-                    <label class="block text-sm font-black text-slate-700 mb-2">Barrio / Sector</label>
-                    <input type="text" name="barrio" id="barrio-input" placeholder="Ej: Los Prados"
-                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all">
+            <!-- 3. DESCRIPCIÓN -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+                <p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-4">
+                    Detalles Adicionales
+                    <span class="text-red-400 ml-1">*</span>
+                </p>
+                <div class="relative">
+                    <textarea name="descripcion" id="descripcion" rows="4" required
+                              maxlength="500"
+                              placeholder="Describe la situación (ej. contenedor desbordado, basura acumulada en esquina...)"
+                              class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-0 placeholder-slate-400 transition-all resize-none"></textarea>
+                    <div class="absolute bottom-3 right-4 text-[11px] text-slate-400 font-bold">
+                        <span id="char-count">0</span>/500
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-black text-slate-700 mb-2">Punto de referencia</label>
-                    <input type="text" name="referencia" placeholder="Ej: Frente al Supermercado..."
-                           class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 placeholder-slate-400 transition-all">
+
+                <!-- Extra fields: barrio / referencia -->
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">
+                            Barrio / Sector
+                            <span class="text-primary-500 ml-1">📍</span>
+                        </label>
+                        <input type="hidden" name="barrio" id="barrio-input">
+                        <div id="barrio-display"
+                             class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-400 select-none cursor-default flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0 animate-pulse text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span id="barrio-text">Detectando...</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-2">Punto de referencia</label>
+                        <input type="text" name="referencia" placeholder="Ej: Frente al Supermercado..."
+                               class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-all placeholder-slate-400">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar / Location -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="card-premium p-6 overflow-hidden">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="text-sm font-black text-slate-700">Ubicación exacta</div>
-                    <div id="geocoding-loader" class="hidden">
-                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-primary-500 border-t-transparent"></div>
+        <!-- ─── RIGHT COLUMN ───────────────────────────────────── -->
+        <div class="lg:col-span-2 space-y-5">
+
+            <!-- Municipio (auto via GPS) -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                    Municipio <span class="text-red-400">*</span>
+                </p>
+                <!-- Display card: solo muestra el municipio detectado por GPS -->
+                <div id="municipio-display" class="flex items-center gap-3 bg-slate-100 border-2 border-slate-200 rounded-2xl px-4 py-3.5">
+                    <div id="municipio-icon" class="w-8 h-8 bg-slate-200 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                        <svg style="width:16px;height:16px;stroke:#94a3b8;" class="animate-pulse" fill="none" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p id="municipio-nombre" class="text-sm font-bold text-slate-400 truncate">Detectando...</p>
+                        <p id="municipio-sub" class="text-[10px] text-slate-400">Detectado por GPS automáticamente</p>
                     </div>
                 </div>
-                <div id="mini-map"></div>
-                <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                        <span class="text-primary-600 font-bold block mb-1">TIP DE USO:</span>
-                        Arrastra el pin al lugar del problema. Intentaremos detectar tu municipio y barrio automáticamente ahorrándote tiempo.
-                    </p>
-                </div>
-                <input type="hidden" name="latitud" id="lat-input" value="18.4861">
-                <input type="hidden" name="longitud" id="lng-input" value="-69.9312">
+
+                <!-- Hidden select keeps the actual value for form submission -->
+                <select name="municipio" id="municipio-select" class="sr-only">
+                    <option value="">— Selecciona municipio —</option>
+                    {% for mun in municipios %}
+                    <option value="{{ mun.id }}"
+                            data-nombre="{{ mun.nombre }}"
+                            data-lat="{{ mun.latitud_centro }}"
+                            data-lng="{{ mun.longitud_centro }}">{{ mun.nombre }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <button type="submit" class="w-full gradient-hero hover:opacity-90 text-white font-black py-5 rounded-2xl shadow-xl shadow-green-900/30 transition-all hover:scale-[1.02] active:scale-[0.98] border border-primary-500/20">
-                Enviar Reporte Ciudadano →
-            </button>
-            
-            <div class="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex items-center gap-4">
-                <div class="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center text-white shrink-0">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            <!-- MAPA -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 overflow-hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Ubicación Precisa</p>
+                        <p id="address-display" class="text-xs text-primary-600 font-semibold mt-0.5 truncate max-w-[200px]">
+                            Detectando...
+                        </p>
+                    </div>
+                    <!-- Geocoding spinner -->
+                    <div id="geocoding-loader" class="hidden">
+                        <svg class="animate-spin w-4 h-4 text-primary-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                    </div>
                 </div>
-                <p class="text-[12px] font-bold text-primary-800 leading-tight">
-                    Recuerda: Subir una foto real aumenta la velocidad de resolución y tus puntos.
+
+                <!-- Map container with locate button -->
+                <div class="relative rounded-2xl overflow-hidden border border-slate-200">
+                    <div id="mini-map"></div>
+                    <button type="button" id="locate-btn" title="Usar mi ubicación actual">
+                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">
+                    La ubicación se detecta automáticamente por GPS. Pulsa el icono 📍 para refrescar.
+                </p>
+
+                <input type="hidden" name="latitud"  id="lat-input"  value="18.4861">
+                <input type="hidden" name="longitud" id="lng-input"  value="-69.9312">
+            </div>
+
+            <!-- SUBMIT -->
+            <button type="submit" id="submit-btn"
+                    class="w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-black py-5 rounded-2xl shadow-xl shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 text-base">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+                <span>Enviar Reporte</span>
+                <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+            </button>
+
+            <!-- Points reminder -->
+            <div class="bg-gradient-to-r from-primary-50 to-emerald-50 border border-primary-100 rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center text-white text-lg font-black flex-shrink-0">
+                    +10
+                </div>
+                <p class="text-xs font-bold text-primary-800 leading-tight">
+                    Ganarás <strong>puntos LimpioRD</strong> cuando tu reporte sea marcado como <strong>resuelto</strong>.
                 </p>
             </div>
         </div>
     </form>
 </div>
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var defaultLat = 18.4861;
-    var defaultLng = -69.9312;
+// ── Categorías JSON para iconos en mapa ──────────────────────────────────
+var categoriaIconos = {
+    {% for cat in categorias %}
+    "{{ cat.id }}": { color: "{{ cat.color }}", nombre: "{{ cat.nombre }}" },
+    {% endfor %}
+};
 
-    var map = L.map('mini-map', {
-        center: [defaultLat, defaultLng],
-        zoom: 13,
-        zoomControl: true,
-        scrollWheelZoom: false
+// ── Mapa Leaflet ─────────────────────────────────────────────────────────
+var defaultLat = 18.4861, defaultLng = -69.9312;
+var currentMarker = null;
+var currentCatColor = '#10b981';
+
+var map = L.map('mini-map', {
+    center:          [defaultLat, defaultLng],
+    zoom:            14,
+    zoomControl:     true,
+    scrollWheelZoom: false,
+    attributionControl: false,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+}).addTo(map);
+
+setTimeout(function() { map.invalidateSize(); }, 300);
+
+// ── Marker dinámico por categoría ────────────────────────────────────────
+function makeIcon(color) {
+    return L.divIcon({
+        className: '',
+        html: `
+        <div style="position:relative;width:36px;height:42px;">
+            <svg viewBox="0 0 36 42" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 0C8.058 0 0 8.058 0 18c0 12.628 16.2 23.376 16.884 23.82a2 2 0 002.232 0C19.8 41.376 36 30.628 36 18 36 8.058 27.942 0 18 0z"
+                      fill="${color}" opacity="0.95"/>
+            </svg>
+            <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);
+                        width:20px;height:20px;background:white;border-radius:50%;
+                        display:flex;align-items:center;justify-content:center;font-size:11px;">
+                🗑️
+            </div>
+        </div>`,
+        iconSize:    [36, 42],
+        iconAnchor:  [18, 42],
+        popupAnchor: [0, -44],
     });
+}
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '©OpenStreetMap contributors',
-        maxZoom: 19
-    }).addTo(map);
+currentMarker = L.marker([defaultLat, defaultLng], {
+    icon:     makeIcon(currentCatColor),
+    draggable: false,
+}).addTo(map);
 
-    var marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+// ── Update icon when category changes ────────────────────────────────────
+function updateMapIcon(e) {
+    var catId = e.target.value;
+    var cfg   = categoriaIconos[catId];
+    if (cfg && currentMarker) {
+        currentCatColor = cfg.color;
+        currentMarker.setIcon(makeIcon(cfg.color));
+    }
+}
 
-    setTimeout(function(){ map.invalidateSize(); }, 400);
+// ── Inputs coordenadas ────────────────────────────────────────────────────
+function updateInputs(lat, lng, fromGps) {
+    document.getElementById('lat-input').value = lat.toFixed(6);
+    document.getElementById('lng-input').value = lng.toFixed(6);
+    // Match municipio by distance immediately (no need to wait for Nominatim)
+    matchMunicipioByCoords(lat, lng, fromGps || false);
+    // Nominatim only for barrio + address display
+    reverseGeocode(lat, lng);
+}
 
-    function reverseGeocode(lat, lng) {
-        document.getElementById('geocoding-loader').classList.remove('hidden');
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
-            headers: { 'Accept-Language': 'es' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.address) {
-                // Autocompletar Barrio
-                const barrio = data.address.suburb || data.address.neighbourhood || data.address.residential || '';
-                if (barrio) {
-                    document.getElementById('barrio-input').value = barrio;
-                }
-                
-                // Intentar emparejar Municipio con mayor precisión
-                const city = (data.address.city || data.address.town || data.address.village || data.address.municipality || '').toLowerCase();
-                const province = (data.address.province || data.address.state || '').toLowerCase();
 
-                if (city || province) {
-                    const select = document.getElementById('municipio-select');
-                    for (let i = 0; i < select.options.length; i++) {
-                        const opt = select.options[i];
-                        const normMun = opt.getAttribute('data-nombre')?.toLowerCase() || '---';
-                        
-                        // Si el nombre del municipio está en la ciudad o en la provincia
-                        if (city.includes(normMun) || province.includes(normMun) || normMun.includes(city)) {
-                            select.selectedIndex = i;
-                            break;
-                        }
-                    }
-                }
+// ── Reverse Geocoding ────────────────────────────────────────────────────
+function reverseGeocode(lat, lng) {
+    var loader  = document.getElementById('geocoding-loader');
+    var display = document.getElementById('address-display');
+    loader.classList.remove('hidden');
+
+    fetch(
+        'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&zoom=18&addressdetails=1',
+        { headers: { 'Accept-Language': 'es', 'User-Agent': 'LimpioRD/1.0' } }
+    )
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data && data.address) {
+            var addr = data.address;
+
+            // ── Barrio ──
+            var barrio = addr.suburb || addr.neighbourhood || addr.residential || addr.quarter || '';
+            var barrioInput   = document.getElementById('barrio-input');
+            var barrioText    = document.getElementById('barrio-text');
+            if (barrio) {
+                barrioInput.value    = barrio;
+                barrioText.textContent = barrio;
+                barrioText.classList.remove('text-slate-400');
+                barrioText.classList.add('text-slate-700', 'font-semibold');
+            } else {
+                barrioText.textContent = 'No detectado';
             }
-        })
-        .finally(() => {
-            document.getElementById('geocoding-loader').classList.add('hidden');
-        });
-    }
 
-    function updateInputs(lat, lng) {
-        document.getElementById('lat-input').value = lat.toFixed(6);
-        document.getElementById('lng-input').value = lng.toFixed(6);
-        reverseGeocode(lat, lng);
-    }
+            // ── Dirección resumida (encabezado del mapa) ──
+            var calle  = addr.road || addr.pedestrian || addr.path || '';
+            var numero = addr.house_number || '';
+            var displayStr = calle ? (calle + (numero ? ' ' + numero : '')) : barrio;
+            if (displayStr) display.textContent = displayStr;
 
-    marker.on('dragend', function(e) {
-        var pos = marker.getLatLng();
-        updateInputs(pos.lat, pos.lng);
+            // ── Municipio — buscar el más cercano por distancia ──────────────
+            // (ignoramos el texto de Nominatim para municipio, usamos coordenadas)
+            matchMunicipioByCoords(lat, lng, true);   // true = viene de GPS
+        }
+    })
+    .catch(function() { display.textContent = 'Ubicación seleccionada'; })
+    .finally(function() { loader.classList.add('hidden'); });
+}
+
+// ── Actualiza el display del municipio (solo GPS) ────────────────────────
+function selectMunicipio(id, nombre) {
+    var sel = document.getElementById('municipio-select');
+    for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value == id) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById('municipio-nombre').textContent = nombre;
+    document.getElementById('municipio-nombre').style.color = '#1e293b';
+    document.getElementById('municipio-sub').textContent = 'Detectado por GPS automáticamente';
+    var icon = document.getElementById('municipio-icon');
+    icon.style.background = '#d1fae5';
+    icon.innerHTML =
+        '<svg style="width:16px;height:16px;stroke:#10b981;" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>' +
+        '<path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>';
+}
+
+// ── Municipio por coordenadas (más cercano) ──────────────────────────────
+function matchMunicipioByCoords(lat, lng, fromGps) {
+    var sel  = document.getElementById('municipio-select');
+    var best = null, bestDist = Infinity;
+    for (var i = 1; i < sel.options.length; i++) {
+        var opt  = sel.options[i];
+        var olat = parseFloat(opt.getAttribute('data-lat'));
+        var olng = parseFloat(opt.getAttribute('data-lng'));
+        if (isNaN(olat) || isNaN(olng)) continue;
+        var d = (lat - olat) * (lat - olat) + (lng - olng) * (lng - olng);
+        if (d < bestDist) { bestDist = d; best = opt; }
+    }
+    if (best) {
+        selectMunicipio(best.value, best.getAttribute('data-nombre'));
+    }
+}
+
+// ── GPS de alta precisión ────────────────────────────────────────────────
+var gpsWatchId   = null;
+var bestAccuracy = Infinity;   // metros — solo aceptamos mejoras
+var mapCentrado  = false;
+
+function mostrarPrecision(acc) {
+    var display = document.getElementById('address-display');
+    var texto = acc < 10  ? '📍 GPS preciso (' + Math.round(acc) + ' m)' :
+                acc < 30  ? '📍 GPS bueno ('   + Math.round(acc) + ' m)' :
+                acc < 80  ? '⏳ Ajustando GPS (' + Math.round(acc) + ' m)...' :
+                            '⏳ Buscando señal (' + Math.round(acc) + ' m)...';
+    display.textContent = texto;
+}
+
+function aplicarPosicion(pos, centrar) {
+    var acc = pos.coords.accuracy;
+    // Solo actualizar si esta lectura es más precisa que la mejor anterior
+    if (acc >= bestAccuracy) return;
+    bestAccuracy = acc;
+
+    var lat    = pos.coords.latitude;
+    var lng    = pos.coords.longitude;
+    var latlng = L.latLng(lat, lng);
+
+    currentMarker.setLatLng(latlng);
+    updateInputs(lat, lng, true);
+    mostrarPrecision(acc);
+
+    if (centrar || !mapCentrado) {
+        map.setView(latlng, 18);
+        mapCentrado = true;
+    }
+}
+
+function iniciarGPS() {
+    if (!navigator.geolocation) {
+        document.getElementById('address-display').textContent = 'GPS no disponible en este dispositivo.';
+        return;
+    }
+    bestAccuracy = Infinity;
+    mapCentrado  = false;
+    document.getElementById('address-display').textContent = '⏳ Buscando señal GPS...';
+
+    if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+
+    gpsWatchId = navigator.geolocation.watchPosition(
+        function(pos) { aplicarPosicion(pos, false); },
+        function(err) {
+            if (err.code === 1) {
+                document.getElementById('address-display').textContent = 'Permiso de GPS denegado.';
+            }
+            // En timeout/sin señal: seguir esperando (watchPosition reintentará)
+        },
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+    );
+}
+
+// ── Botón de localizar ───────────────────────────────────────────────────
+document.getElementById('locate-btn').addEventListener('click', function() {
+    var btn = this;
+    btn.classList.add('animate-pulse');
+    bestAccuracy = Infinity;   // forzar re-centrado aunque sea la misma posición
+    mapCentrado  = false;
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            aplicarPosicion(pos, true);
+            btn.classList.remove('animate-pulse');
+        },
+        function() { btn.classList.remove('animate-pulse'); },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+});
+
+// ── Iniciar GPS al cargar ────────────────────────────────────────────────
+iniciarGPS();
+
+// ── Persistencia del formulario (sessionStorage) ─────────────────────────
+var FORM_KEY = 'limpioRD_reporte_draft';
+
+function saveDraft() {
+    var sel = document.getElementById('municipio-select');
+    sessionStorage.setItem(FORM_KEY, JSON.stringify({
+        descripcion: document.getElementById('descripcion').value,
+        referencia:  (document.querySelector('[name="referencia"]') || {}).value || '',
+        categoria:   (document.querySelector('[name="categoria"]:checked') || {}).value || '',
+        municipio:   sel ? sel.value : '',
+        lat:         document.getElementById('lat-input').value,
+        lng:         document.getElementById('lng-input').value,
+    }));
+}
+
+function restoreDraft() {
+    var raw = sessionStorage.getItem(FORM_KEY);
+    if (!raw) return;
+    try {
+        var d = JSON.parse(raw);
+        if (d.descripcion) {
+            document.getElementById('descripcion').value = d.descripcion;
+            document.getElementById('char-count').textContent = d.descripcion.length;
+        }
+        if (d.referencia) {
+            var refEl = document.querySelector('[name="referencia"]');
+            if (refEl) refEl.value = d.referencia;
+        }
+        if (d.categoria) {
+            var catRadio = document.querySelector('[name="categoria"][value="' + d.categoria + '"]');
+            if (catRadio) {
+                catRadio.checked = true;
+                // Trigger Alpine and map icon update
+                catRadio.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        // Coordinates: restore pin position (GPS will override if it gets a fix)
+        if (d.lat && d.lng) {
+            var lat = parseFloat(d.lat), lng = parseFloat(d.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                document.getElementById('lat-input').value = d.lat;
+                document.getElementById('lng-input').value = d.lng;
+                map.setView([lat, lng], 16);
+                currentMarker.setLatLng([lat, lng]);
+                // Re-run geocode to restore barrio/municipio display
+                reverseGeocode(lat, lng);
+            }
+        }
+    } catch(e) {}
+}
+
+// Save on any form field change
+document.getElementById('reporte-form').addEventListener('input', saveDraft);
+document.getElementById('reporte-form').addEventListener('change', saveDraft);
+
+// Restore on page load
+restoreDraft();
+
+// ── Contador de caracteres ───────────────────────────────────────────────
+var textarea  = document.getElementById('descripcion');
+var charCount = document.getElementById('char-count');
+textarea.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+    charCount.className   = this.value.length > 450 ? 'text-red-500' : '';
+});
+
+// ── Preview de foto ──────────────────────────────────────────────────────
+var fotoInput   = document.getElementById('foto-input');
+var preview     = document.getElementById('photo-preview');
+var placeholder = document.getElementById('photo-placeholder');
+var removeBtn   = document.getElementById('remove-photo');
+
+fotoInput.addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+        alert('La imagen no puede superar los 10 MB.');
+        this.value = '';
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        removeBtn.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+});
+
+removeBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fotoInput.value   = '';
+    preview.src       = '';
+    preview.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    removeBtn.classList.add('hidden');
+});
+
+// ── Drag & Drop en la zona de foto ───────────────────────────────────────
+var photoLabel = document.getElementById('photo-label');
+['dragover','dragleave','drop'].forEach(function(evt) {
+    photoLabel.addEventListener(evt, function(e) {
+        e.preventDefault();
+        if (evt === 'dragover') photoLabel.classList.add('dragover');
+        else photoLabel.classList.remove('dragover');
+        if (evt === 'drop' && e.dataTransfer.files.length) {
+            fotoInput.files = e.dataTransfer.files;
+            fotoInput.dispatchEvent(new Event('change'));
+        }
     });
+});
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(pos) {
-            var coords = [pos.coords.latitude, pos.coords.longitude];
-            map.setView(coords, 16);
-            marker.setLatLng(coords);
-            updateInputs(coords[0], coords[1]);
-        }, null, { enableHighAccuracy: true });
+// ── Loading state + custom municipio validation ──────────────────────────
+document.getElementById('reporte-form').addEventListener('submit', function(e) {
+    var sel = document.getElementById('municipio-select');
+    if (!sel.value) {
+        e.preventDefault();
+        document.getElementById('municipio-display').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('municipio-nombre').textContent = 'Selecciona un municipio';
+        document.getElementById('municipio-nombre').style.color = '#ef4444';
+        document.getElementById('municipio-icon').style.background = '#fee2e2';
+        document.getElementById('municipio-icon').innerHTML =
+            '<svg style="width:16px;height:16px;stroke:#ef4444;" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        return;
     }
+    // Borrar borrador al enviar correctamente
+    sessionStorage.removeItem(FORM_KEY);
+    if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
+
+    var btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><span>Enviando...</span>';
 });
 </script>
 {% endblock %}

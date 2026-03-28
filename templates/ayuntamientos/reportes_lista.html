@@ -48,8 +48,13 @@
                 {% for r in reportes %}
                 <tr class="hover:bg-gray-50 transition-colors" x-data="{open:false}">
                     <td class="px-6 py-4">
-                        <div class="font-semibold text-gray-900">{{ r.barrio|default:"Sin barrio" }}</div>
-                        <div class="text-gray-400 text-xs mt-0.5">{{ r.descripcion|truncatechars:50 }}</div>
+                        <div class="font-semibold text-gray-900">
+                            {% if r.barrio %}{{ r.barrio }}{% elif r.municipio %}{{ r.municipio.nombre }}{% else %}Sin ubicación{% endif %}
+                        </div>
+                        <div class="text-gray-400 text-xs mt-0.5">
+                            {% if r.barrio and r.municipio %}<span class="text-gray-300">{{ r.municipio.nombre }} · </span>{% endif %}
+                            {{ r.descripcion|truncatechars:50 }}
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-gray-600">{{ r.categoria.nombre|default:"—" }}</td>
                     <td class="px-6 py-4">
