@@ -15,6 +15,9 @@ COPY . .
 # Directorios que Django necesita
 RUN mkdir -p logs media staticfiles static
 
+# Corregir saltos de línea Windows (CRLF → LF) para que el script corra en Linux
+RUN sed -i 's/\r//' entrypoint.sh
+
 EXPOSE 8000
 
-ENTRYPOINT ["sh", "entrypoint.sh"]
+ENTRYPOINT ["bash", "entrypoint.sh"]
