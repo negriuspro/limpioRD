@@ -198,7 +198,8 @@
                     <option value="{{ mun.id }}"
                             data-nombre="{{ mun.nombre }}"
                             data-lat="{{ mun.latitud_centro }}"
-                            data-lng="{{ mun.longitud_centro }}">{{ mun.nombre }}</option>
+                            data-lng="{{ mun.longitud_centro }}"
+                            {% if mun == user_municipio %}selected{% endif %}>{{ mun.nombre }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -810,5 +811,20 @@ document.getElementById('cancelar-manual').addEventListener('click', function() 
     // Reiniciar GPS
     iniciarGPS();
 });
+
+// ── Mostrar municipio preseleccionado al cargar ──────────────────────────
+(function() {
+    var sel = document.getElementById('municipio-select');
+    if (sel && sel.value) {
+        var opt = sel.options[sel.selectedIndex];
+        var nombre = opt.getAttribute('data-nombre');
+        document.getElementById('municipio-nombre').textContent = nombre;
+        document.getElementById('municipio-nombre').style.color = '#1e293b';
+        document.getElementById('municipio-sub').textContent = 'Tu municipio registrado';
+        var icon = document.getElementById('municipio-icon');
+        icon.style.background = '#dbeafe';
+        icon.innerHTML = '<svg style="width:16px;height:16px;stroke:#3b82f6;" fill="none" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>';
+    }
+})();
 </script>
 {% endblock %}

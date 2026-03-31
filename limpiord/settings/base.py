@@ -75,12 +75,24 @@ DATABASES = {
     }
 }
 
-# Caché local (sin Redis)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+# Caché: Redis si REDIS_URL está definido, local si no
+_REDIS_URL = os.environ.get("REDIS_URL", "")
+if _REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": _REDIS_URL,
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        }
     }
-}
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
 
 SESSION_COOKIE_AGE = 86400  # 24 horas
 SESSION_COOKIE_SECURE = False  # HTTP local

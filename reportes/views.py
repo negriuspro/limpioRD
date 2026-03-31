@@ -95,8 +95,9 @@ def crear_reporte(request):
             messages.error(request, f'Error al enviar el reporte: {str(e)}')
 
     return render(request, 'ciudadano/crear_reporte.html', {
-        'categorias': categorias,
-        'municipios': municipios,
+        'categorias':      categorias,
+        'municipios':      municipios,
+        'user_municipio':  request.user.municipio,
     })
 
 

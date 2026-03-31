@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      ACCEPT_EULA: 'Y'
-      MSSQL_SA_PASSWORD: 'YourStrong!Passw0rd'
-      MSSQL_PID: 'Express'
-    ports:
-      - '1433:1433'
-    volumes:
-      - mssql_data:/var/opt/mssql
 
   redis:
     image: redis:7-alpine
@@ -18,7 +8,28 @@ services:
       - '6379:6379'
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  web:
+    build: .
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  mssql_data:
   redis_data:
