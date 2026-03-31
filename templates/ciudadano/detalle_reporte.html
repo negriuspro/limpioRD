@@ -179,6 +179,23 @@
             </div>
             {% endif %}
 
+            <!-- Confirmar reporte -->
+            {% if reporte.estado != 'resuelto' and reporte.estado != 'rechazado' %}
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+                <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest mb-3">¿Sigues viendo el problema?</p>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Si todavía hay basura en este lugar, ayuda a darle más prioridad confirmando el reporte.</p>
+                <button id="btn-confirmar"
+                        onclick="confirmarReporte('{% url 'reportes:confirmar_reporte' reporte.id %}')"
+                        class="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 py-3 rounded-2xl text-sm font-bold transition-colors">
+                    <span class="text-lg">👍</span>
+                    <span id="confirmar-label">Confirmar — yo también lo vi</span>
+                </button>
+                <p class="text-center text-xs text-slate-400 mt-2">
+                    <span id="votos-count">{{ reporte.votos_confirmacion }}</span> confirmación{{ reporte.votos_confirmacion|pluralize:"es" }}
+                </p>
+            </div>
+            {% endif %}
+
             <!-- Actions -->
             <div class="bg-slate-100 rounded-3xl p-5 space-y-3">
                 <a href="{% url 'reportes:mis_reportes' %}"
@@ -226,5 +243,30 @@
     L.marker([lat, lng], { icon: icon }).addTo(map);
     setTimeout(function() { map.invalidateSize(); }, 200);
 })();
+
+function confirmarReporte(url) {
+    var btn = document.getElementById('btn-confirmar');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.classList.add('opacity-60');
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.ok) {
+            document.getElementById('votos-count').textContent = d.votos;
+            document.getElementById('confirmar-label').textContent = '¡Confirmado! Gracias';
+            btn.classList.remove('bg-amber-50', 'hover:bg-amber-100', 'border-amber-200', 'text-amber-700');
+            btn.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
+        }
+    })
+    .catch(function() { btn.disabled = false; btn.classList.remove('opacity-60'); });
+}
 </script>
 {% endblock %}
