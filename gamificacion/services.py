@@ -66,6 +66,6 @@ class PuntosService:
             puntos=-recompensa.puntos_requeridos,
             descripcion=f"Canje: {recompensa.titulo}",
             comercio_ref=recompensa.comercio,
-            saldo_despues=perfil.puntos_totales
+            saldo_despues=perfil.puntos_disponibles
         )
         return canje

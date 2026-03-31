@@ -48,18 +48,26 @@
             <!-- Ranking -->
             <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
                 <p class="text-[11px] text-slate-400 font-black uppercase tracking-widest mb-3">Ranking Ciudadano</p>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 mb-4">
                     <div class="w-12 h-12 bg-yellow-50 rounded-2xl flex items-center justify-center text-2xl">🏆</div>
                     <div>
                         <p class="font-black text-slate-900 text-sm">Top Ciudadanos Verdes</p>
-                        <p class="text-xs text-slate-400">+1.2k ciudadanos activos</p>
+                        <p class="text-xs text-slate-400">{{ total_ciudadanos }} ciudadanos activos</p>
                     </div>
                 </div>
-                <div class="mt-4 flex -space-x-2">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">A</div>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">B</div>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 border-2 border-white flex items-center justify-center text-white text-xs font-bold">C</div>
-                    <div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-slate-500 text-xs font-bold">+k</div>
+                <div class="space-y-2">
+                    {% for p in top_ciudadanos %}
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-slate-400 w-5">{{ forloop.counter }}</span>
+                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                            {{ p.usuario.nombre|first|upper }}
+                        </div>
+                        <span class="text-xs font-bold text-slate-700 flex-1 truncate">{{ p.usuario.nombre }} {{ p.usuario.apellido }}</span>
+                        <span class="text-xs font-black text-primary-600">{{ p.puntos_totales }} pts</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-400">Sin datos de ranking aún.</p>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -126,78 +134,30 @@
 
             <!-- Recompensas tab -->
             <div x-show="tab === 'rewards'" x-transition class="grid sm:grid-cols-2 gap-4">
-
-                {% with disponibles=perfil.puntos_disponibles %}
-
-                <!-- Recompensa 1 -->
-                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 relative overflow-hidden group">
-                    <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🛒</div>
-                    <h4 class="text-lg font-black text-slate-900 mb-1 leading-tight">Vale de 500 RD$</h4>
-                    <p class="text-xs text-slate-400 font-bold mb-5">Supermercados Nacional</p>
+                {% for r in recompensas %}
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 relative overflow-hidden group
+                    {% if not r.puede %}opacity-80{% endif %}">
+                    <div class="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🎁</div>
+                    <h4 class="text-lg font-black text-slate-900 mb-1 leading-tight">{{ r.obj.titulo }}</h4>
+                    <p class="text-xs text-slate-400 font-bold mb-5">{{ r.obj.comercio.nombre_comercial }}</p>
                     <div class="flex items-center justify-between">
-                        <span class="text-primary-600 font-black">2,000 pts</span>
-                        {% if disponibles >= 2000 %}
+                        <span class="text-primary-600 font-black">{{ r.obj.puntos_requeridos }} pts</span>
+                        {% if r.puede %}
                             <button class="bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-primary-500 transition-colors">Canjear</button>
                         {% else %}
                             <span class="text-xs text-slate-400 font-bold bg-slate-100 px-3 py-1.5 rounded-xl">
-                                Faltan {{ 2000|add:"-"|add:disponibles }} pts
+                                Faltan {{ r.faltan }} pts
                             </span>
                         {% endif %}
                     </div>
                 </div>
-
-                <!-- Recompensa 2 -->
-                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 relative overflow-hidden group">
-                    <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🎟️</div>
-                    <h4 class="text-lg font-black text-slate-900 mb-1 leading-tight">2×1 en Cine</h4>
-                    <p class="text-xs text-slate-400 font-bold mb-5">Caribbean Cinemas</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-primary-600 font-black">800 pts</span>
-                        {% if disponibles >= 800 %}
-                            <button class="bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-primary-500 transition-colors">Canjear</button>
-                        {% else %}
-                            <span class="text-xs text-slate-400 font-bold bg-slate-100 px-3 py-1.5 rounded-xl">
-                                Faltan {{ 800|add:"-"|add:disponibles }} pts
-                            </span>
-                        {% endif %}
-                    </div>
+                {% empty %}
+                <div class="col-span-2 bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center">
+                    <div class="text-4xl mb-3">🎁</div>
+                    <p class="font-bold text-slate-700">No hay recompensas disponibles</p>
+                    <p class="text-sm text-slate-400 mt-1">Pronto se agregarán recompensas de comercios aliados.</p>
                 </div>
-
-                <!-- Recompensa 3 -->
-                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 relative overflow-hidden group">
-                    <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">☕</div>
-                    <h4 class="text-lg font-black text-slate-900 mb-1 leading-tight">Café Gratis</h4>
-                    <p class="text-xs text-slate-400 font-bold mb-5">Café Barua</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-primary-600 font-black">300 pts</span>
-                        {% if disponibles >= 300 %}
-                            <button class="bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-primary-500 transition-colors">Canjear</button>
-                        {% else %}
-                            <span class="text-xs text-slate-400 font-bold bg-slate-100 px-3 py-1.5 rounded-xl">
-                                Faltan {{ 300|add:"-"|add:disponibles }} pts
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Recompensa 4 -->
-                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 relative overflow-hidden group">
-                    <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">🎪</div>
-                    <h4 class="text-lg font-black text-slate-900 mb-1 leading-tight">Entrada Zoo</h4>
-                    <p class="text-xs text-slate-400 font-bold mb-5">Jardín Zoológico Nacional</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-primary-600 font-black">1,200 pts</span>
-                        {% if disponibles >= 1200 %}
-                            <button class="bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-primary-500 transition-colors">Canjear</button>
-                        {% else %}
-                            <span class="text-xs text-slate-400 font-bold bg-slate-100 px-3 py-1.5 rounded-xl">
-                                Faltan {{ 1200|add:"-"|add:disponibles }} pts
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                {% endwith %}
+                {% endfor %}
             </div>
         </div>
     </div>

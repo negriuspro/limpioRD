@@ -12,6 +12,8 @@
     #locate-btn:hover { background: #10b981; color: white; }
     #locate-btn svg { transition: inherit; }
     #locate-btn:hover svg { stroke: white; }
+    #manual-map { height: 300px; width: 100%; border-radius: 1rem; }
+    .modo-manual-activo { border-color: #f59e0b !important; background: #fffbeb !important; }
 </style>
 <div class="min-h-screen bg-slate-50 pb-20">
 <div class="max-w-5xl mx-auto px-4 py-10 pt-6">
@@ -238,6 +240,57 @@
                 <input type="hidden" name="longitud" id="lng-input"  value="-69.9312">
             </div>
 
+            <!-- MAPA MANUAL -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 overflow-hidden">
+                <!-- Toggle header -->
+                <button type="button" id="toggle-manual-map"
+                        class="w-full flex items-center justify-between gap-3 group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-black text-slate-700 uppercase tracking-widest">Ubicación Manual</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">¿El GPS está mal? Coloca el pin tú mismo</p>
+                        </div>
+                    </div>
+                    <div id="manual-chevron" class="text-slate-400 transition-transform duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </button>
+
+                <!-- Collapsible content -->
+                <div id="manual-map-panel" class="hidden mt-4">
+                    <!-- Aviso modo manual -->
+                    <div id="modo-manual-banner" class="hidden mb-3 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span class="text-xs font-bold text-amber-700">Modo manual activo — usando coordenadas del mapa manual</span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
+                        Toca o haz clic en el mapa para colocar el pin en la ubicación exacta del problema.
+                    </p>
+
+                    <div class="relative rounded-2xl overflow-hidden border-2 border-slate-200" id="manual-map-border">
+                        <div id="manual-map"></div>
+                    </div>
+
+                    <div class="mt-3 flex items-center justify-between">
+                        <p id="manual-coords-display" class="text-[11px] text-slate-400 font-mono">Sin selección</p>
+                        <button type="button" id="cancelar-manual"
+                                class="hidden text-[11px] text-red-500 font-bold hover:text-red-700 transition-colors">
+                            ✕ Cancelar manual
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- SUBMIT -->
             <button type="submit" id="submit-btn"
                     class="w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-black py-5 rounded-2xl shadow-xl shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 text-base">
@@ -285,8 +338,9 @@ var map = L.map('mini-map', {
     attributionControl: false,
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19,
 }).addTo(map);
 
 setTimeout(function() { map.invalidateSize(); }, 300);
@@ -628,6 +682,133 @@ document.getElementById('reporte-form').addEventListener('submit', function(e) {
     var btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><span>Enviando...</span>';
+});
+
+// ── MAPA MANUAL ──────────────────────────────────────────────────────────
+var manualMap         = null;
+var manualMarker      = null;
+var modoManualActivo  = false;
+var manualMapInited   = false;
+
+function initManualMap() {
+    if (manualMapInited) return;
+    manualMapInited = true;
+
+    // Centrar en las coordenadas actuales del GPS (o default)
+    var lat0 = parseFloat(document.getElementById('lat-input').value) || 18.4861;
+    var lng0 = parseFloat(document.getElementById('lng-input').value) || -69.9312;
+
+    manualMap = L.map('manual-map', {
+        center: [lat0, lng0],
+        zoom: 16,
+        zoomControl: true,
+        scrollWheelZoom: true,
+        attributionControl: false,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+    }).addTo(manualMap);
+
+    setTimeout(function() { manualMap.invalidateSize(); }, 200);
+
+    // Colocar pin al hacer clic en el mapa
+    manualMap.on('click', function(e) {
+        var lat = e.latlng.lat, lng = e.latlng.lng;
+        colocarPinManual(lat, lng);
+    });
+}
+
+function colocarPinManual(lat, lng) {
+    if (manualMarker) {
+        manualMarker.setLatLng([lat, lng]);
+    } else {
+        manualMarker = L.marker([lat, lng], {
+            icon: makeIcon('#f59e0b'),
+            draggable: true,
+        }).addTo(manualMap);
+
+        manualMarker.on('dragend', function() {
+            var pos = manualMarker.getLatLng();
+            aplicarUbicacionManual(pos.lat, pos.lng);
+        });
+    }
+
+    aplicarUbicacionManual(lat, lng);
+}
+
+function aplicarUbicacionManual(lat, lng) {
+    modoManualActivo = true;
+
+    // Actualizar inputs del formulario
+    document.getElementById('lat-input').value = lat.toFixed(6);
+    document.getElementById('lng-input').value = lng.toFixed(6);
+
+    // Sincronizar pin del mapa GPS también
+    currentMarker.setLatLng([lat, lng]);
+    map.setView([lat, lng], 17);
+
+    // Actualizar municipio y barrio
+    matchMunicipioByCoords(lat, lng, false);
+    reverseGeocode(lat, lng);
+
+    // Mostrar coordenadas en UI
+    document.getElementById('manual-coords-display').textContent =
+        lat.toFixed(6) + ', ' + lng.toFixed(6);
+
+    // Mostrar banner y botón cancelar
+    document.getElementById('modo-manual-banner').classList.remove('hidden');
+    document.getElementById('cancelar-manual').classList.remove('hidden');
+    document.getElementById('manual-map-border').classList.add('border-amber-400');
+    document.getElementById('manual-map-border').classList.remove('border-slate-200');
+
+    // Mostrar en address-display
+    document.getElementById('address-display').textContent = '📌 Ubicación manual seleccionada';
+
+    // Detener GPS para que no sobreescriba la posición manual
+    if (gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+    }
+}
+
+// Toggle panel
+document.getElementById('toggle-manual-map').addEventListener('click', function() {
+    var panel   = document.getElementById('manual-map-panel');
+    var chevron = document.getElementById('manual-chevron');
+    var isOpen  = !panel.classList.contains('hidden');
+
+    if (isOpen) {
+        panel.classList.add('hidden');
+        chevron.style.transform = '';
+    } else {
+        panel.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+        initManualMap();
+        // Centrar mapa manual en posición GPS actual
+        if (manualMap && !modoManualActivo) {
+            var lat0 = parseFloat(document.getElementById('lat-input').value) || 18.4861;
+            var lng0 = parseFloat(document.getElementById('lng-input').value) || -69.9312;
+            manualMap.setView([lat0, lng0], 16);
+            setTimeout(function() { manualMap.invalidateSize(); }, 100);
+        }
+    }
+});
+
+// Cancelar modo manual → volver a GPS
+document.getElementById('cancelar-manual').addEventListener('click', function() {
+    modoManualActivo = false;
+
+    if (manualMarker) { manualMap.removeLayer(manualMarker); manualMarker = null; }
+
+    document.getElementById('modo-manual-banner').classList.add('hidden');
+    document.getElementById('cancelar-manual').classList.add('hidden');
+    document.getElementById('manual-coords-display').textContent = 'Sin selección';
+    document.getElementById('manual-map-border').classList.remove('border-amber-400');
+    document.getElementById('manual-map-border').classList.add('border-slate-200');
+
+    // Reiniciar GPS
+    iniciarGPS();
 });
 </script>
 {% endblock %}

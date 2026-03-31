@@ -33,8 +33,6 @@ INSTALLED_APPS = [
     'ayuntamientos',
     'gamificacion',
     'comercios',
-    'analytics',
-    'publicidad',
     'api',
     'negocios',
 ]

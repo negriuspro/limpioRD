@@ -2,6 +2,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from ayuntamientos.models import Municipio
 from .models import Usuario
 
 
@@ -10,6 +11,13 @@ class AuthViewTests(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.municipio = Municipio.objects.create(
+            nombre='Distrito Nacional',
+            codigo='DN-TEST',
+            latitud_centro='18.4861',
+            longitud_centro='-69.9312',
+            esta_activo=True,
+        )
         self.user = Usuario.objects.create_user(
             email='test@limpiord.com',
             password='TestPass123!',
@@ -65,10 +73,14 @@ class AuthViewTests(TestCase):
     def test_signup_valid_data_creates_user(self):
         """Registro con datos válidos crea usuario y redirige."""
         response = self.client.post(reverse('accounts:signup'), {
-            'nombre':   'María',
-            'apellido': 'González',
-            'email':    'maria@test.com',
-            'password': 'SecurePass99',
+            'nombre':    'María',
+            'apellido':  'González',
+            'email':     'maria@test.com',
+            'telefono':  '809-555-1234',
+            'cedula':    '001-0000001-1',
+            'edad':      '28',
+            'municipio': str(self.municipio.id),
+            'password':  'SecurePass99',
         })
         self.assertRedirects(response, '/ciudadano/dashboard/', fetch_redirect_response=False)
         self.assertTrue(Usuario.objects.filter(email='maria@test.com').exists())

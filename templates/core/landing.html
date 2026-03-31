@@ -54,19 +54,19 @@
                     </a>
                 </div>
 
-                <!-- Stats -->
+                <!-- Stats dinámicas -->
                 <div class="grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
                     <div>
-                        <p class="text-3xl font-black text-white">1.2<span class="text-primary-400">K</span></p>
+                        <p class="text-3xl font-black text-white">{{ stats.reportes_resueltos }}</p>
                         <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Reportes resueltos</p>
                     </div>
                     <div class="border-l border-white/10 pl-6">
-                        <p class="text-3xl font-black text-white">98<span class="text-primary-400">+</span></p>
-                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Comercios aliados</p>
+                        <p class="text-3xl font-black text-white">{{ stats.ciudadanos_activos }}<span class="text-primary-400">+</span></p>
+                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Ciudadanos activos</p>
                     </div>
                     <div class="border-l border-white/10 pl-6">
-                        <p class="text-3xl font-black text-white">4.2<span class="text-primary-400">h</span></p>
-                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Tiempo resp.</p>
+                        <p class="text-3xl font-black text-white">{{ stats.municipios_activos }}</p>
+                        <p class="text-xs text-emerald-200/60 font-bold uppercase tracking-wider mt-1">Municipios</p>
                     </div>
                 </div>
             </div>

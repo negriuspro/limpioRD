@@ -45,6 +45,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     nombre          = models.CharField(max_length=100)
     apellido        = models.CharField(max_length=100)
     telefono        = models.CharField(max_length=20, blank=True)
+    cedula          = models.CharField(max_length=20, blank=True)
+    edad            = models.PositiveSmallIntegerField(null=True, blank=True)
     rol             = models.CharField(max_length=30, choices=ROLES, default=ROL_CIUDADANO)
     avatar          = models.ImageField(upload_to='avatars/', blank=True, null=True)
     barrio          = models.CharField(max_length=100, blank=True)

@@ -12,6 +12,7 @@ from datetime import timedelta
 from core.decorators import rol_requerido
 from accounts.models import Usuario
 from reportes.models import Reporte
+from ayuntamientos.models import Municipio
 
 
 def _get_queryset_para_municipio(user):
@@ -102,9 +103,25 @@ def mapa_calor(request):
             'foto_url':   foto_url,
         })
 
+    municipios = list(
+        Municipio.objects.filter(esta_activo=True)
+        .values('nombre', 'codigo', 'latitud_centro', 'longitud_centro')
+    )
+    municipios_json = json.dumps([
+        {
+            'nombre':   m['nombre'],
+            'codigo':   m['codigo'],
+            'latitud':  str(m['latitud_centro']),
+            'longitud': str(m['longitud_centro']),
+        }
+        for m in municipios
+        if m['latitud_centro'] and m['longitud_centro']
+    ])
+
     return render(request, 'ayuntamientos/mapa.html', {
-        'puntos_json':  json.dumps(puntos),
-        'total_activos': len(puntos),
+        'puntos_json':     json.dumps(puntos),
+        'total_activos':   len(puntos),
+        'municipios_json': municipios_json,
     })
 
 
@@ -198,6 +215,53 @@ def api_stats_dashboard(request):
 
 @login_required
 @rol_requerido([Usuario.ROL_FUNCIONARIO, Usuario.ROL_ADMIN_AYUNTAMIENTO, Usuario.ROL_ADMIN_SISTEMA])
+def exportar_reportes_csv(request):
+    """Descarga todos los reportes del municipio en CSV."""
+    import csv
+    from django.http import HttpResponse
+    qs = _get_queryset_para_municipio(request.user).select_related('categoria', 'ciudadano', 'municipio').order_by('-creado_en')
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="reportes.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Municipio', 'Categoría', 'Estado', 'Urgencia', 'Barrio', 'Descripción', 'Ciudadano', 'Latitud', 'Longitud', 'Fecha'])
+    for r in qs:
+        writer.writerow([
+            str(r.id), r.municipio.nombre, r.categoria.nombre,
+            r.estado, r.urgencia, r.barrio, r.descripcion,
+            r.ciudadano.email if r.ciudadano else 'Anónimo',
+            r.latitud, r.longitud, r.creado_en.strftime('%Y-%m-%d %H:%M'),
+        ])
+    return response
+
+
+@login_required
+@rol_requerido([Usuario.ROL_FUNCIONARIO, Usuario.ROL_ADMIN_AYUNTAMIENTO, Usuario.ROL_ADMIN_SISTEMA])
+def lista_usuarios(request):
+    """Lista de ciudadanos registrados en el municipio del admin."""
+    qs = Usuario.objects.filter(rol=Usuario.ROL_CIUDADANO)
+    municipio = getattr(request.user, 'municipio', None)
+    if municipio and request.user.rol != Usuario.ROL_ADMIN_SISTEMA:
+        qs = qs.filter(municipio=municipio)
+    buscar = request.GET.get('q', '')
+    if buscar:
+        qs = qs.filter(
+            Q(nombre__icontains=buscar) |
+            Q(apellido__icontains=buscar) |
+            Q(email__icontains=buscar)
+        )
+    qs = qs.order_by('-creado_en')
+    from django.core.paginator import Paginator
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'ayuntamientos/usuarios.html', {
+        'usuarios': page_obj,
+        'buscar':   buscar,
+        'total':    qs.count(),
+    })
+
+
+@login_required
+@rol_requerido([Usuario.ROL_FUNCIONARIO, Usuario.ROL_ADMIN_AYUNTAMIENTO, Usuario.ROL_ADMIN_SISTEMA])
 def cambiar_estado_reporte(request, reporte_id):
     if request.method == 'POST':
         from django.http import JsonResponse
@@ -206,7 +270,7 @@ def cambiar_estado_reporte(request, reporte_id):
         notas        = request.POST.get('notas', '')
         ReporteService.cambiar_estado(reporte_id, nuevo_estado, request.user, notas)
         # Si es petición AJAX (desde el mapa) responde JSON; si es form normal redirige
-        if request.headers.get('X-CSRFToken'):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'ok': True})
         messages.success(request, 'Estado actualizado correctamente.')
     return redirect('/panel/reportes/')

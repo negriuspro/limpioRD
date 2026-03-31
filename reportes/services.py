@@ -53,7 +53,7 @@ class ReporteService:
         if nuevo_estado == Reporte.ESTADO_RESUELTO and estado_anterior != Reporte.ESTADO_RESUELTO:
             if reporte.ciudadano:
                 from gamificacion.services import PuntosService
-                puntos = PuntosService.otorgar_puntos(reporte.ciudadano, 'reporte_nuevo', reporte=reporte)
+                puntos = PuntosService.otorgar_puntos(reporte.ciudadano, 'reporte_resuelto', reporte=reporte)
                 reporte.puntos_otorgados = puntos
                 reporte.save(update_fields=['puntos_otorgados'])
 

@@ -5,12 +5,12 @@
 <div class="min-h-[100vh] gradient-hero flex items-center justify-center px-4 py-20 relative overflow-hidden">
     <!-- Grid Pattern Overlay -->
     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMGg0MHY0MEgwem0zOSAzOVYxam0tMzggMHYtMzh6bTEgMGgzOHYxbS0zOC0zaDM4djF6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIi8+Cjwvc3ZnPg==')] opacity-20"></div>
-    
+
     <!-- Background blobs -->
     <div class="absolute top-[10%] left-[20%] w-[400px] h-[400px] bg-primary-500/20 rounded-full blur-[100px] animate-pulse-slow"></div>
     <div class="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-emerald-700/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1s"></div>
 
-    <div class="w-full max-w-[500px] relative z-10 animate-fade-up">
+    <div class="w-full max-w-[600px] relative z-10 animate-fade-up">
         <!-- Card -->
         <div class="glass-dark rounded-[2.5rem] border border-white/10 p-10 shadow-2xl shadow-black/50 relative overflow-hidden">
             <!-- Decorative accent line -->
@@ -25,48 +25,101 @@
                 <p class="text-emerald-100/60 text-sm mt-2 font-medium">Únete y empieza a mejorar tu municipio</p>
             </div>
 
-            <form method="POST" action="{% url 'accounts:signup' %}" class="space-y-6">
+            <form method="POST" action="{% url 'accounts:signup' %}" class="space-y-5">
                 {% csrf_token %}
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Nombre -->
-                    <div class="space-y-1.5 group">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Nombre</label>
+
+                <!-- Nombre y Apellido -->
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Nombre *</label>
                         <input type="text" name="nombre" required placeholder="Juan"
+                               value="{{ post.nombre|default:'' }}"
                                class="w-full px-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
                     </div>
-                    <!-- Apellido -->
-                    <div class="space-y-1.5 group">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Apellido</label>
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Apellido *</label>
                         <input type="text" name="apellido" required placeholder="Pérez"
+                               value="{{ post.apellido|default:'' }}"
                                class="w-full px-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
                     </div>
                 </div>
 
-                <!-- Email -->
+                <!-- Correo -->
                 <div class="space-y-1.5 relative group">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Correo Electrónico</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Correo Electrónico *</label>
                     <div class="relative">
                         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         <input type="email" name="email" required placeholder="juan@ejemplo.com"
+                               value="{{ post.email|default:'' }}"
                                class="w-full pl-12 pr-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
                     </div>
                 </div>
 
-                <!-- Password -->
+                <!-- Teléfono y Edad -->
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5 relative group">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Teléfono *</label>
+                        <div class="relative">
+                            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <input type="tel" name="telefono" required placeholder="809-555-1234"
+                                   value="{{ post.telefono|default:'' }}"
+                                   class="w-full pl-12 pr-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Edad *</label>
+                        <input type="number" name="edad" required placeholder="25" min="14" max="120"
+                               value="{{ post.edad|default:'' }}"
+                               class="w-full px-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                    </div>
+                </div>
+
+                <!-- Cédula -->
+                <div class="space-y-1.5 relative group">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Cédula *</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                        <input type="text" name="cedula" required placeholder="001-1234567-8"
+                               value="{{ post.cedula|default:'' }}"
+                               class="w-full pl-12 pr-4 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner">
+                    </div>
+                </div>
+
+                <!-- Municipio -->
+                <div class="space-y-1.5 relative group">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Municipio *</label>
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <select name="municipio" required
+                                class="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner appearance-none">
+                            <option value="">Selecciona tu municipio...</option>
+                            {% for m in municipios %}
+                            <option value="{{ m.id }}"
+                                {% if post.municipio == m.id|stringformat:"s" %}selected{% endif %}>
+                                {{ m.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+
+                <!-- Contraseña -->
                 <div class="space-y-1.5 relative group" x-data="{showPass:false}">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Contraseña</label>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-primary-400 ml-1">Contraseña *</label>
                     <div class="relative">
                         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <input :type="showPass ? 'text' : 'password'" name="password" required placeholder="••••••••"
+                        <input :type="showPass ? 'text' : 'password'" name="password" required placeholder="••••••••" minlength="8"
                                class="w-full pl-12 pr-12 py-3.5 bg-gray-900/50 border border-gray-600/50 text-white placeholder-gray-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all text-sm font-medium shadow-inner tracking-widest">
                         <button type="button" @click="showPass=!showPass" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none">
                             <svg x-show="!showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             <svg x-show="showPass" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                         </button>
                     </div>
+                    <p class="text-xs text-gray-500 ml-1">Mínimo 8 caracteres</p>
                 </div>
 
-                <div class="pt-4">
+                <div class="pt-2">
                     <button type="submit" class="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-1 text-sm flex justify-center items-center gap-2 group">
                         <span>Completar Registro</span>
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -74,7 +127,7 @@
                 </div>
             </form>
 
-            <div class="mt-8 text-center">
+            <div class="mt-6 text-center">
                 <p class="text-sm text-gray-400 pt-6 border-t border-gray-700/50">
                     ¿Ya tienes una cuenta? <a href="{% url 'accounts:login' %}" class="text-white hover:text-primary-400 font-semibold transition-colors">Inicia Sesión</a>
                 </p>

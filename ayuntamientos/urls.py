@@ -8,7 +8,9 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('mapa/', views.mapa_calor, name='mapa'),
     path('reportes/', views.lista_reportes, name='reportes'),
+    path('reportes/exportar/', views.exportar_reportes_csv, name='exportar_reportes'),
     path('reportes/<uuid:reporte_id>/estado/', views.cambiar_estado_reporte, name='cambiar_estado'),
+    path('usuarios/', views.lista_usuarios, name='usuarios'),
     path('api/puntos/', views.api_puntos_mapa, name='api_puntos'),
     path('api/stats/', views.api_stats_dashboard, name='api_stats'),
 ]

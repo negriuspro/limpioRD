@@ -9,6 +9,7 @@ from ayuntamientos.models import Municipio
 from gamificacion.models import PerfilGamificacion
 from gamificacion.services import PuntosService
 
+from django.http import JsonResponse
 from .models import Reporte, CategoriaResiduo
 from .services import ReporteService
 
@@ -136,12 +137,47 @@ def detalle_reporte(request, reporte_id):
     })
 
 
+# ── Confirmar Reporte (votos ciudadanos) ──────────────────────────────────
+@login_required
+def confirmar_reporte(request, reporte_id):
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+    reporte = get_object_or_404(Reporte, id=reporte_id)
+    reporte.votos_confirmacion = (reporte.votos_confirmacion or 0) + 1
+    reporte.save(update_fields=['votos_confirmacion'])
+    return JsonResponse({'ok': True, 'votos': reporte.votos_confirmacion})
+
+
 # ── Mis Puntos ─────────────────────────────────────────────────────────────
 @login_required
 def mis_puntos(request):
+    from comercios.models import Recompensa
+    from accounts.models import Usuario
+
     perfil, _ = PerfilGamificacion.objects.get_or_create(usuario=request.user)
     transacciones = perfil.transacciones.all()[:30]
+
+    disponibles = perfil.puntos_disponibles
+    recompensas_qs = Recompensa.objects.filter(activo=True).select_related('comercio').order_by('puntos_requeridos')
+    recompensas = []
+    for r in recompensas_qs:
+        recompensas.append({
+            'obj':    r,
+            'faltan': max(0, r.puntos_requeridos - disponibles),
+            'puede':  disponibles >= r.puntos_requeridos,
+        })
+
+    top_ciudadanos = (
+        PerfilGamificacion.objects
+        .select_related('usuario')
+        .order_by('-puntos_totales')[:5]
+    )
+    total_ciudadanos = Usuario.objects.filter(rol='ciudadano', esta_activo=True).count()
+
     return render(request, 'ciudadano/mis_puntos.html', {
-        'perfil':        perfil,
-        'transacciones': transacciones,
+        'perfil':           perfil,
+        'transacciones':    transacciones,
+        'recompensas':      recompensas,
+        'top_ciudadanos':   top_ciudadanos,
+        'total_ciudadanos': total_ciudadanos,
     })

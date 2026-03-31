@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Ciudadanos Registrados — LimpioRD{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-black text-gray-900">Ciudadanos Registrados</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                <span class="font-bold text-primary-600">{{ total }}</span> ciudadano{{ total|pluralize:"s" }} en tu municipio
+            </p>
+        </div>
+        <a href="/panel/dashboard/" class="hidden sm:inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary-600 font-semibold transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Dashboard
+        </a>
+    </div>
+
+    <!-- Búsqueda -->
+    <form method="GET" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 mb-5 flex gap-3">
+        <div class="relative flex-1">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" name="q" value="{{ buscar }}" placeholder="Buscar por nombre, apellido o correo..."
+                   class="w-full pl-9 pr-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 transition-all">
+        </div>
+        <button type="submit" class="px-4 py-2.5 bg-primary-600 text-white text-sm font-bold rounded-xl hover:bg-primary-500 transition-colors">
+            Buscar
+        </button>
+        {% if buscar %}
+        <a href="/panel/usuarios/" class="px-4 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-colors">
+            Limpiar
+        </a>
+        {% endif %}
+    </form>
+
+    <!-- Tabla -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Ciudadano</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Contacto</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Municipio</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Cédula</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Edad</th>
+                        <th class="px-5 py-3.5 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Registrado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for u in usuarios %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-black flex-shrink-0">
+                                    {{ u.nombre|first|upper }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-900">{{ u.nombre }} {{ u.apellido }}</p>
+                                    <p class="text-xs text-gray-400">{{ u.barrio|default:"Sin barrio" }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-4">
+                            <p class="text-gray-700">{{ u.email }}</p>
+                            <p class="text-xs text-gray-400">{{ u.telefono|default:"—" }}</p>
+                        </td>
+                        <td class="px-5 py-4 text-gray-600">{{ u.municipio.nombre|default:"—" }}</td>
+                        <td class="px-5 py-4 text-gray-600 font-mono text-xs">{{ u.cedula|default:"—" }}</td>
+                        <td class="px-5 py-4 text-gray-600">{{ u.edad|default:"—" }}</td>
+                        <td class="px-5 py-4 text-gray-400 text-xs">{{ u.creado_en|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-5 py-16 text-center">
+                            <div class="text-4xl mb-3">👥</div>
+                            <p class="font-bold text-gray-700">No se encontraron ciudadanos</p>
+                            <p class="text-sm text-gray-400 mt-1">{% if buscar %}Intenta con otra búsqueda.{% else %}Aún no hay ciudadanos registrados en tu municipio.{% endif %}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if usuarios.has_other_pages %}
+        <div class="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-xs text-gray-400">Página {{ usuarios.number }} de {{ usuarios.paginator.num_pages }}</p>
+            <div class="flex gap-2">
+                {% if usuarios.has_previous %}
+                <a href="?page={{ usuarios.previous_page_number }}{% if buscar %}&q={{ buscar }}{% endif %}"
+                   class="px-3 py-1.5 text-xs font-bold bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">← Anterior</a>
+                {% endif %}
+                {% if usuarios.has_next %}
+                <a href="?page={{ usuarios.next_page_number }}{% if buscar %}&q={{ buscar }}{% endif %}"
+                   class="px-3 py-1.5 text-xs font-bold bg-primary-600 text-white rounded-lg hover:bg-primary-500 transition-colors">Siguiente →</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
